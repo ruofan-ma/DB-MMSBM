@@ -1,0 +1,1231 @@
+\documentclass[11pt]{article}
+\usepackage{amsmath, amssymb, amsthm}
+\usepackage{graphicx, url}
+\usepackage{rotating}
+\usepackage{multicol}
+\usepackage{enumitem}
+%\usepackage[small,it]{caption}
+\usepackage{subfig}
+%\usepackage{fullpage}
+\usepackage{booktabs}
+\usepackage{epigraph}
+\usepackage[all]{xy}
+\usepackage{verbatim}
+\usepackage{natbib}
+\usepackage{tabularx}
+\usepackage{array,ragged2e}
+\usepackage{tabularx}
+\newcolumntype{B}[1]{>{\RaggedRight\arraybackslash}p{#1}}
+\newcolumntype{C}[1]{>{\RaggedRight\arraybackslash}p{#1}}
+\usepackage[page]{appendix}
+\usepackage{placeins}
+\usepackage{pgf, tikz}
+\usepackage{pdflscape}
+\usepackage{float}
+\usepackage{array}
+\usepackage{ragged2e}
+\newcolumntype{C}[1]{>{\centering\arraybackslash}m{#1}}          % centered
+\newcolumntype{B}[1]{>{\centering\arraybackslash\bfseries}m{#1}} % centered + bold
+
+\usepackage{xr}
+% DON'T change margins - should be 1 inch all around.
+\addtolength{\oddsidemargin}{-.75in}%
+\addtolength{\evensidemargin}{-1.25in}%
+\addtolength{\textwidth}{1.5in}%
+\addtolength{\textheight}{2in}%
+\addtolength{\topmargin}{-1in}%
+\usepackage{setspace}
+%\def\spacingset#1{\renewcommand{\baselinestretch}%
+%  {#1}\small\normalsize} \spacingset{1}
+\usepackage{caption}
+
+%% Custom colors
+\definecolor{gray}{rgb}{0.459,0.438,0.471}
+\definecolor{crimson}{rgb}{0.6,0,0}
+\newcommand{\editB}[1]{\textcolor{blue}{#1}}
+
+\usepackage[unicode,
+plainpages=false, 
+pdfpagelabels, 
+bookmarksnumbered,
+pdftitle={\mytitle}, 
+pdfauthor={\myauthor},
+pdfkeywords={\mykeywords},
+colorlinks=true,
+citecolor=crimson, 
+linkcolor=crimson, 
+urlcolor=crimson]{hyperref} 
+
+\usepackage{cleveref}
+
+
+\title{\large Dynamic Bipartite Mixed Membership Blockmodel Regression for Network Data: \\Application to State and Intergovernmental Organization Networks}
+\author{
+Qi Liu\thanks{Department of Government, Harvard University.}
+\and
+Ruofan Ma\thanks{Department of Government, Harvard University. }
+\and
+Santiago Olivella\thanks{Department of Political Science, University of North Carolina. }
+\and
+Kosuke Imai\thanks{Department of Government and Department of Statistics, Harvard University. }
+}
+\date{}
+
+\begin{document}
+\maketitle
+\doublespacing
+%\vspace{-0.6in}
+\section{Introduction}
+Most Political networks are both bipartite and dynamic. ``Bipartite'' means that there are two node types, and ties only form across types. Networks of states–treaties, legislatures–bills, lobbyists-politicians are all examples of bipartite networks. ``Dynamic'' simply implies that ties evolve over time. However, existing studies use static or projected unipartite models, which can cause bias and spurious clustering. In Table~\ref{table:lit_review}, we summarize the methods used in studies published in \emph{American Political Science Review}, \emph{American Journal of Political Science}, \emph{Journal of Politics}, and \emph{Political Analysis} from 2010 to 2024 when the underlying data structure requires a dynamic bipartite model. None of them uses a model that correctly captures both the dynamic and bipartite nature of the networks.
+
+\begin{table}[t]
+\centering \small
+\setlength{\extrarowheight}{2pt}
+\begin{tabular}{|B{0.12\textwidth}|C{0.41\textwidth}|C{0.41\textwidth}|}
+\hline
+ & \centering\arraybackslash \textbf{Static} & \centering\arraybackslash \textbf{Dynamic} \\
+\hline 
+ \textbf{Projected} &
+Box-Steffensmeier et al.\ (2019); Siegel \& Badaan (2020); Weschle (2018); Naidu et al.\ (2021); Cruz et al.\ (2020); Weschle (2019); Boucher \& Thies (2019); Bodea \& Hicks (2015); Jiang \& Zeng (2020); Shaffer (2022); Franzese et al.\ (2012); Lo et al.\ (2023); Goddard (2018); Edgerton (2024); Battaglini et al.\ (2020); Nyhan \& Montgomery (2015); Box-Steffensmeier et al.\ (2020); Oklobdzija (2024); Aar{\o}e \& Peterson (2020); Kim et al.\ (2019); Blair et al.\ (2022); Cho \& Fowler (2010); Cranmer \& Desmarais (2011); Fishman \& Davis (2022); Abi-Hassan et al.\ (2023)
+&
+Kim et al.\ (2020); Gilardi et al.\ (2020); Nieman et al.\ (2021); Harden et al.\ (2023); Uppala \& Desmarais (2023)
+\\
+\hline
+\textbf{Bipartite} &
+Sweet (2021); Kim \& Kunisky (2020) ; Lo et al. (2025)
+&
+
+\\
+\hline
+\end{tabular}
+\caption{\textbf{Network studies by bipartite structure and dynamic design}. Our literature review covers articles with quantitative analyses of political networks with bipartite dynamic structure. Networks which are bipartite and dynamic in theory, but lack the necessary data are excluded from our review. Detailed descriptions of the networks and how authors handled network structures are included in Appendix XX.}
+\label{table:lit_review}
+\end{table}
+
+\begin{table}[t]
+\centering
+\footnotesize
+\setlength{\extrarowheight}{1pt}   
+\renewcommand{\arraystretch}{1.0} 
+\setlength{\tabcolsep}{4pt}      
+
+\begin{tabular}{|B{0.12\textwidth}|C{0.41\textwidth}|C{0.41\textwidth}|}
+\hline
+ & \centering\arraybackslash \textbf{Static} & \centering\arraybackslash \textbf{Dynamic} \\
+\hline 
+\textbf{Projected} &
+\begin{minipage}[t][0.40\textheight][t]{\linewidth} 
+%\raggedright
+\centering  
+Cho \& Fowler (2010)\\
+Cranmer \& Desmarais (2011)\\
+Franzese et al.\ (2012)\\
+Bodea \& Hicks (2015)\\
+Nyhan \& Montgomery (2015)\\
+Goddard (2018)\\
+Weschle (2018)\\
+Boucher \& Thies (2019)\\
+Box-Steffensmeier et al.\ (2019)\\
+Kim et al.\ (2019)\\
+Weschle (2019)\\
+Aar{\o}e \& Peterson (2020)\\
+Battaglini et al.\ (2020)\\
+Box-Steffensmeier et al.\ (2020)\\
+Cruz et al.\ (2020)\\
+Jiang \& Zeng (2020)\\
+Siegel \& Badaan (2020)\\
+Naidu et al.\ (2021)\\
+Blair et al.\ (2022)\\
+Fishman \& Davis (2022)\\
+Shaffer (2022)\\
+Abi-Hassan et al.\ (2023)\\
+Lo et al.\ (2023)\\
+Edgerton (2024)\\
+Oklobdzija (2024)
+\end{minipage}
+&
+\begin{minipage}[t][0.40\textheight][t]{\linewidth}
+%\raggedright
+\centering  
+Gilardi et al.\ (2020)\\
+Kim et al.\ (2020)\\
+Nieman et al.\ (2021)\\
+Harden et al.\ (2023)\\
+Uppala \& Desmarais (2023)
+\end{minipage}
+\\
+\hline
+\textbf{Bipartite} &
+\begin{minipage}[t][0.40\textheight][t]{\linewidth}
+%\raggedright
+\centering  
+Kim \& Kunisky (2020)\\
+Sweet (2021)\\
+Lo et al.\ (2025)
+\end{minipage}
+&
+\begin{minipage}[t][0.40\textheight][t]{\linewidth}
+%\raggedright
+\centering  
+\end{minipage}
+\\
+\hline
+\end{tabular}
+
+\caption{\textbf{Network studies by bipartite structure and dynamic design}. Our literature review covers articles with quantitative analyses of political networks with bipartite dynamic structure. Networks which are bipartite and dynamic in theory, but lack the necessary data are excluded from our review. Detailed descriptions of the networks and how authors handled network structures are included in Appendix XX.}
+\label{table:lit_review}
+\end{table}
+
+
+
+
+
+In international relations, scholars often posit theories about the effects of latent groups of actors on relational outcomes of interest over time. In the study of inter-governmental organizations (IGOs), scholars have long posited how IO membership as a structured system of interconnections shape states' foreign and domestic policy pursuits \citep{beckfield2003inequality, lupu2017networked, davis2023discriminatory}. Understanding which countries join which IGOs, therefore, is crucial for evaluating these effects. However, conventional models often rely on network projections or simplified static representations that distort the true structure of state–IO interactions. 
+
+To address these issues, we propose a \textbf{dynamic bipartite mixed-membership stochastic blockmodel (DB-MMSBM)} regression. This method enables researchers to examine changing group dynamics in bipartite networks over time while avoiding two key pitfalls: (1) the artificial inflation of clustering patterns resulting from network projections, and (2) the loss of valuable temporal information when networks are treated as static. By modeling bipartite networks dynamically, \textbf{DB-MMSBM} identifies latent structures that better reflect the evolving nature of international cooperation. Scholars can apply our model in broad contexts where relational ties are formed between two different types of actors. 
+
+
+\section{The State-IO Membership Network}
+
+In this section, we introduce the state-IO network data, which is central to the study of international cooperation. As our motivating example, we highlight the bipartite and dynamic nature of the data and discuss how common practices of projecting or collapsing this network data in the existing literature lead to an overemphasis of regime type in the role of states' IO memberships, as well as an incomplete understanding of the network's hierarchical structure.
+
+\subsection{Background}
+
+Studying the structure of the state-IO network is a topic of great interest to international relations scholars and policy pundits. On the one hand, states frequently use these organizations to overcome informational hindrance to cooperation, signal and commit to policy stances, and benefit from the club goods provided by IOs \citep{keohane1984after, simmons2010credible, poast2019organizing, carnegie2020secrets}. On the other hand, many IOs manage their membership composition through accession processes, in order to maintain preference congruence, facilitate policy outputs, and ensure organizational vitality \citep{downs1998managing, gray2018life, davis2023discriminatory}. The dynamic interaction between states and IOs, as a result, has formed the foundational structure of international cooperation over time.
+
+Consequently, scholars have been interested in establishing the determinants of membership ties between states and IOs. A prominent argument in the literature of international cooperation identifies regime type as a crucial driver in whether and how states participate in international cooperation. When establishing IOs, democracies and autocracies have different preferences towards the institutional design of IOs \citep{koremenos2016continent}. Whereas democracies are amenable to open, independent IOs and delegate their authorities, autocracies are often unwilling to relinquish their sovereignty and prefer direct controls in IOs' operations \citep{tallberg2014explaining, tallberg2025democracy}. Moreover, democracies and autocracies differ in their tendencies of joining IOs. Given their domestic institutional constraints, democracies are better at conveying their policy commitment, and join trade, climate, and human rights institutions with each other at a higher rate than their autocratic counterparts \citep{mansfield2000free, moravcsik2000origins, battig2009national}. Conversely, while autocracies are less likely to engage in international cooperation, they are more likely to do so with other autocracies \citep{leeds1999domestic}. Lastly, countries transitioning across regime types may join IOs to safeguard their domestic institutions and prevent regime reversals. Across democracies and autocracies, studies have argued that joining IOs more densely populated by states with similar political institutions helps a nascent regime to survive and consolidate \citep{pevehouse2005democracy, poast2019organizing, cottiero2025illiberal}. 
+
+Taken together, the cleavage between democracies and autocracies in their preference towards and behaviors in international cooperation implies that
+the structure of state-IO network is clustered around regime types. In similar veins, scholars have also argued that clustering within the state-IO network may also be driven by economic interdependence \citep{gilpin2016political, lupu2016states}, geopolitical alignment \citep{davis2021forces, davis2023discriminatory}, or shared ideology and norms \citep{barnett2012rules, voeten2021ideology}. How do these cleavages interact with one another and form the boundaries of inter-group associations between states and IOs, however, remains an open question. 
+
+When analyzing the pattern of states' IO membership, researchers often project the bipartite network onto unipartite ones. For instance, many studies transform the state-IO network onto a unipartite graph where state where an edge between two states represents whether or not they share a co-membership in certain IOs (or, in the case of a weighted projection, the number of co-memberships, see \citeauthor{lupu2017networked}, \citeyear{lupu2017networked} for example). Researchers may even do away with the network structure entirely and study only monadic attributes of states (e.g., whether democratization leads to more IO membership). In adopting this strategy,
+however, researchers risk omitting heterogeneity across IOs, such as their accession stringency or membership size.\footnote{Conversely, studies that project the state-IO network onto a unipartite IO network where edges indicate membership overlaps ignores heterogeneities across states. In Table~\ref{lit_table_io}, we summarize papers published in top journals in general political science and the IR-subfield between 2005-2025 that examine state-IO networks and characterize how each study addresses the network structure.} Recent methodological studies have shown that ignoring such IO-specific or state-IO pair-specific information can lead to severe aggregation bias \citep{lo2023statistical}.
+
+Another common methodological approach adopts the assumption of 
+conditional independence of state dyad-year observations given some covariates within the generalized linear model framework. However, there are reasons to believe patterns in states' IO membership
+fail to meet this assumption. Membership in IOs is formed overtime, and states' participation in IOs tend to be sticky. Even states' exits and withdrawals from IOs have received increasing scholarly and media attentions, they remain extraordinarily rare \citep{von2019hello, schmidt2025damaged}. 
+
+
+
+\subsection{The dynamic bipartite state-IO network}
+We focus on the global network of state memberships in IGOs, drawing on \citet{davis2021forces}, which expands the Correlates of War (COW) Intergovernmental Organizations dataset \citep{pevehouse2020tracking}. The data record formal state membership in 471 IGOs for 200 states from 1965 to 2014. Each observation represents a dyadic tie between a state and an IGO in a given year, forming a dynamic bipartite network that captures the evolving structure of international institutional cooperation. 
+
+By treating states and IGOs as two distinct sets of actors, the bipartite network preserves important heterogeneity in both actors. States vary widely not only in the number of IGOs they join but also in which set of IGOs they are members of. Some states, like North Korea, are highly isolated, while EU countries are members of numerous IOs. While the United States and China both participate in a wide set of IOs, they differ greatly in which IOs they join. Likewise, IGOs vary in both their membership sizes and the sets of states they include. These membership dynamics reflect different logics of international cooperation.
+
+Figure~\ref{map} (a) provides a geographic illustration of this bipartite network in 2014, using four example IGOs and 20 states. Each gray dot represents a state with lines connecting them to four IGOs showing their membership. The United Nations (UN) and the African Union (AU) have relatively more members, although the AU is regionally focused. The Organisation for Economic Co-operation and Development (OECD) and the Shanghai Cooperation Organization (SCO) are smaller, but they also have distinct members. OECD members are primarily located in Europe and the Americas, whereas SCO members are concentrated in Asia. Projecting this network into a unipartite structure, however, loses important information and can be misleading. Figure~\ref{map} (b) shows this same network, projected as the number of shared IGO co-membership ties between state dyads. Many ties have a weight of one, which is co-membership in the UN. However, for dyads sharing ties with a weight of two, some were co-members of the UN and the OECD (e.g., the United States-South Korea), some were co-members of the UN and the AU (e.g., Zambia-Egypt), and some are co-members of the UN and the SCO (China-Russia). These ties represent completely different types of cooperation between states, but they are projected to be the same tie in a unipartite network. 
+
+
+\begin{figure}[h!]
+\centering
+\scriptsize
+\begin{tabular}{cc}
+
+\includegraphics[width=0.5\linewidth]{illustration/new/map_selected.pdf} &
+\includegraphics[width=0.5\linewidth]{illustration/new/map_selected_projected.pdf} \\[-2pt]
+(a) State-IGO membership & (b) Projected state-state co-membership \\[6pt]
+\end{tabular}
+
+\caption{\small \textbf{Illustration of the membership relation between states and IGOs (2014).} Figure (a) shows the geographic distribution of membership for four major IGOs in 20 states. Each gray dot represents a state, plotted at its geographic centroid, while red triangles indicate the positions of four prominent IGOs: the United Nations (UN), the Organisation for Economic Co-operation and Development (OECD), the African Union (AU), and the Shanghai Cooperation Organization (SCO). The 20 states include seven representative states we analyze later, and 13 other randomly sampled states. Curved lines connect each state to the 
+organizations in which it holds membership. Figure (b) shows the same network projected into a unipartite network. Ties between states indicate the number of shared co-membership. This figure highlights the loss of information when projecting the state-IGO co-membership network into a unipartite one.}
+\label{map}
+\end{figure}
+
+Figure~\ref{net_visual} extends this network to be dynamic, moving from 1965 to 2014. We focus on a representative subset of 11 IGOs that vary in their membership composition and trajectory over time. First of all, different IOs have distinct numbers and types of members. The UN, the International Telecommunication Union (ITU), and the International Atomic Energy Agency (IAEA) have many more members than others. They also involve states with a wide range of regimes. Meanwhile, the OECD, the EU, and the North Atlantic Treaty Organization (NATO) are smaller and mainly comprise democratic member states. The Arab Cooperation Council (ACC), the SCO, and the Economic Community of West African States (ECOWAS) are smaller organizations with fewer democratic members.  If we project this network into a unipartite one, we would lose the difference between IOs like OECD, NATO, and SCO, ECOWAS, because they have similar membership sizes. However, they have very different membership compositions and cooperation logics.
+
+Importantly, the network has undergone significant evolution over time. Some IGOs came into existence only recently (e.g., the SCO), while others have been terminated (e.g., the ACC). The network has become denser over time, indicating that states' membership in IGOs has expanded.  The trajectory of change also varies across IGOs. The International Organization of Migration (IOMig) has expanded rapidly in recent years, especially towards many autocratic countries. ECOWAS members, in contrast, have become more democratic. States also differ markedly in the breadth and timing of their institutional engagements: some finalized their ties in the early decades, while others are still actively joining IGOs (though the latter still differ in which organizations they join). Collapsing this network into a static one or slicing it into several snapshots would miss the changing behavior of states and the dynamic structure of IGOs. 
+
+Therefore, collapsing IGOs and focusing only on the number of organizations that states join (or, conversely, aggregating across states to study IGO characteristics) or ignoring the temporal development of this network would miss important structural and behavioral variation. Such simplification obscures the mechanisms through which cooperation occurs, treating all organizations as equivalent and all membership ties as static. In reality, both states and IGOs differ substantially in when and how they form connections, and these differences are often associated with regime type, political alignment, and institutional design. By modeling the dynamic bipartite structure directly, we retain the full heterogeneity in membership composition and timing, allowing us to identify how distinct types of states and organizations evolve over time.
+
+
+\begin{figure}[h!]
+\centering
+\scriptsize
+\begin{tabular}{c}
+
+\includegraphics[width=0.9\linewidth]{illustration/new/dynamic.pdf} \\[-2pt]
+%(a) All IGOs & (b) Selected IGOs \\[6pt]
+\end{tabular}
+
+\caption{\small \textbf{State-IGO membership networks (1965-2014).} The figure depicts three snapshots of the dynamic bipartite membership network between states and IGOs, with all states sorted by their regime type in 2014 (most democratic states on the right). The edges are colored according to their regime type in each corresponding year. The figure includes all states and 10 representative IGOs (UN: United Nations, ITU: International Telecommunication Union, IAEA: International Atomic Energy Agency, OECD:  Organization for Economic Co-operation and Development, EU: European Union, NATO: North Atlantic Treaty Organization, ACC: Arab Cooperation Council, SCO: Shanghai Cooperation Organization, ECOWAS: Economic Community of West African States, IOMig: International Organization of Migration). Six states are labeled for reference. These networks illustrate the large heterogeneity in both composition and degree across both states and IGOs, as well as across time in our network. States with missing data on regime type are omitted from this figure. }
+\label{net_visual}
+\end{figure}
+
+
+
+\FloatBarrier
+\section{The Proposed Methodology}
+In this section, we begin by describing the core intuition behind the model, which we refer to as the dynamic bipartite mixed-membership stochastic blockmodel (DB-MMSBM). We then formally present the full modeling
+approach, and discuss estimation strategies that enable the analysis of large networks.
+
+\subsection{Modeling strategy}
+We represent an observed network as a bipartite graph that is observed over time, for which there exist two disjoint sets or families of nodes. For a bipartite graph in each period, a set of undirected edges are formed between pairs of nodes belonging to these two different families. In other words, no edge exists between any two nodes of the same family. In our application, states and IGOs correspond to these two families. The edges represent states holding membership in IGOs, which only occur between states and IGOs and do not exist directly among states or IGOs.
+
+The dynamic bipartite mixed-membership stochastic blockmodel (DB-MMSBM) assumes that a node belongs to
+one of several latent groups when interacting with nodes of the other family. For any dyadic relationship between two nodes of different families, the latent group memberships of the nodes determine the likelihood
+of forming an edge. Thus, a state may belong to different latent communities when deciding whether to
+join different IGOs. Similarly, IGOs can be sorted into separate latent groups across state-IO dyads. For instance, China might have behaved similarly to other democracies when
+deciding whether to join the World Trade Organization (WTO), but might have acted differently when
+considering membership in the Shanghai Cooperation Organization (SCO). This is a pattern that could help us understand China's unique role in institutional cooperation, simultaneously engaging with established liberal regimes and fostering parallel institutions aligned with its regional and strategic interests.
+
+To capture this, we define a probabilistic model to account for the variety of these latent community memberships. Each state and each IO belongs to a mixture of several different communities. The fact that each node belongs to their corresponding communities corresponds to the ``mixed-membership''
+portion of the model. Mixed-memberships can be explained using node-level covariates, which are
+characteristics of states and IGOs, such as regime type for states and membership size for IGOs.
+
+Then a matrix, which is the so-called blockmodel, encodes the probabilities
+of forming an edge (i.e., state membership in IGOs) between communities of states and communities of IGOs. Some
+pairs of communities may have a higher probability of establishing membership than others. The blockmodel can thus
+capture a variety of strategies in joining IGOs among states, affording them flexibility in the way they cooperate with others in the international fora. 
+
+State-IO membership networks are particularly likely to display this kind of stochastic equivalence undergirding
+our model, as similar types of states (e.g., advanced liberal democracies) can be expected to join similar types of international organizations. The same group-based dynamics, however, are common in other networks--such as
+those defined by economic trade between countries and co-occurrence of words in documents. We now turn
+to a formal presentation of the details of our full model.
+
+The model also allows for repeated observations of the changing state-IO network over time. Each latent group is directly associated with its own set of nodal covariates, and the dynamic implementation provides flexibility for covariate effects to vary across periods. In other words, while the underlying community structure remains stable over time, the strength and direction of associations between covariates and latent memberships can evolve. This feature enables the model to capture how the determinants of joining international institutions, such as economic conditions, regime type, or geopolitical interests, change in their influence as the international cooperation landscape shifts. By modeling dynamics through time-varying covariate effects, the DB-MMSBM thus offers a nuanced view of how states adapt their patterns of cooperation (and IGOs evolve their accession strategies) over time.
+
+\subsection{The Dynamic Bipartite Mixed-Membership Stochastic Blockmodel}
+Formally, let $G_t = (V_{1,t}, V_{2,t}, E_t)$ represent a dynamic bipartite graph observed at time $t$, where $V_{1 \cdot}$ and $V_{2 \cdot}$ denote two disjoint families of nodes and $E_{\cdot}$ represents the set of undirected edges between two nodes of different families. Suppose that (at $t$) family 1 has $N_{1,t} = |V_{1,t}|$ nodes whereas the number of nodes in family 2 is $N_{2,t} = |V_{2 ,t}|$. For a pair of nodes $p,q$, let $z_{pq,t} \in \{1, \dots, K_{1}\}$ denote the latent group that node $p \in V_{1,t}$ of family 1 instantiates when interacting with node $q \in V_{2,t}$ whose latent group membership is denoted by $u_{pqt} \in \{1, \dots, K_{2}\}$. Further, let $y_{pqt} = 1$ if there exists a directed edge from node $p$ to $q$ for $(p,q) \in E_t$, and $y_{pqt} = 0$ otherwise. \par
+
+Our model incorporates node-level information, and the effect of node-level attributes can change over time. This is a crucial feature of the model because it incorporates (monadic) state and IO level predictor information directly into the definition of the mixed-membership probabilities of latent groups. These covariates themselves predict the likelihood of states joining IGOs through the resulting instantiated element of the blockmodel. Specifically, assume the network at time $t$ is in one of $M$ latent states, and that a Markov process governs transitions from one state to the next. We then assume the mixed-membership vectors are generated according to Markov-dependent mixtures with Dirichlet distributions whose concentration parameters are functions of node covariates:
+
+\begin{equation*}
+\begin{aligned}
+\boldsymbol{\pi}_{pt} \mid \boldsymbol{\beta}_{1} \sim \sum_{m=1}^M \mathbb{P}\left(S_t = m |  S_{t-1}\right) \times \mathrm{Dirichlet}\left( \left\{ \exp \left( \mathbf{x}^\top_{pt} \boldsymbol{\beta}_{1gm} \right)  \right\}_{g=1}^{K_1} \right)
+, \\[6pt]
+\boldsymbol{\psi}_{qt} \mid \boldsymbol{\beta}_{2} \sim \sum_{m=1}^M \mathbb{P}\left(S_t = m |  S_{t-1}\right) \times \mathrm{Dirichlet}\left( \left\{ \exp \left( \mathbf{x}^\top_{qt} \boldsymbol{\beta}_{2hm} \right)  \right\}_{h=1}^{K_2} \right)
+\end{aligned}
+\end{equation*}
+
+, where the vector of predictors $\boldsymbol{x}_{it}$ is allowed to vary over time, vectors $\boldsymbol{\beta}_{1gm}$ and $\boldsymbol{\beta}_{2hm}$, indexed by state $m$ in the Markov process, contain regression coefficients associated with the $g$th and $h$th groups of vertex families 1 and 2. Further, the random states are generated according to:
+
+\begin{equation*}
+\begin{aligned}
+S_t \mid S_{t-1} \sim \mathrm{Categorical}(\mathrm{A}_n)
+\end{aligned}
+\end{equation*}
+
+, where $\mathrm{A}$ is the transition matrix. We define a uniform prior over the initial state $S_1$ and independent symmetric Dirichlet prior distribution for the rows of $\mathrm{A}$. Then, as common in mixed-membership SBMs, we define a categorical sampling model for the dyad-state specific group memberships, $z_{pq,t}$ and $u_{pq,t}$ as:
+
+\begin{equation*}
+\begin{aligned}
+z_{pq,t} \mid \boldsymbol{\pi}_{pt} \sim \mathrm{Categorical}(\boldsymbol{\pi}_{pt}),  \; \; u_{pq,t} \mid \boldsymbol{\psi}_{qt} \sim \mathrm{Categorical}(\boldsymbol{\psi}_{qt})
+\end{aligned}
+\end{equation*}
+
+The model is then completed by defining a $K_1 \times K_2$ blockmodel $\mathrm{B}$, with its $B_{gh}$ element giving the log odds of forming an edge between any two latent group members. Therefore:
+
+\begin{equation*}
+\begin{aligned}
+y_{pqt} \mid z_{pqt}, u_{pqt}, \mathbf{B}, \boldsymbol{\gamma} \stackrel{\mathrm{indep.}}{\sim} \mathrm{Bernoulli}\left( \mathrm{logit}^{-1}(B_{z_{pqt}, u_{pqt}} + \mathbf{d}_{pqt}^\top \gamma) \right)
+\end{aligned}
+\end{equation*}
+
+
+In sum, the data-generating process can be described as follows:\footnote{Figure~\ref{model} shows a plate diagram of the model. }
+\begin{enumerate}
+    \item For each time period $t > 1$, draw a historical state $S_t \mid S_{t-1} = n \sim \mathrm{Categorical}(\mathbf{A}_n)$
+    \item For each node $p \in V_1$ and $q \in V_2$ at time $t$, draw state-dependent mixed-membership vectors $$\boldsymbol{\pi}_{pt} \mid \boldsymbol{\beta}_1, S_t = m \sim \mathrm{Dirichlet}\left( \left\{ \exp(\mathbf{x}_{pt}^\top \boldsymbol{\beta}_{1gm}) \right\}_{g=1}^{K_1}\right)$$  
+    $$\boldsymbol{\psi}_{qt} \mid \boldsymbol{\beta}_2, S_t = m \sim \mathrm{Dirichlet}\left( \left\{ \exp(\mathbf{x}_{qt}^\top \boldsymbol{\beta}_{2hm}) \right\}_{h=1}^{K_2}\right)$$
+    \item For each pair of nodes $(p,q) \in E_t$ at time $t$,
+        \begin{itemize}
+            \item Sample a group indicator  $z_{pq,t} \mid \boldsymbol{\pi}_{pt} \sim \mathrm{Categorical}(\boldsymbol{\pi}_{pt})$
+            \item Sample a group indicator $u_{pq,t} \mid \boldsymbol{\psi}_{qt} \sim \mathrm{Categorical}(\boldsymbol{\psi}_{qt})$
+            \item Sample a link between them $y_{pqt} \mid z_{pqt}, u_{pqt}, \mathbf{B}, \boldsymbol{\gamma} \stackrel{\mathrm{indep.}}{\sim} \mathrm{Bernoulli}\left( \mathrm{logit}^{-1}(B_{z_{pqt}, u_{pqt}} + \mathbf{d}_{pqt}^\top \gamma) \right)$
+        \end{itemize}
+\end{enumerate}
+
+Putting it all together, the full joint distribution of data and latent variables is given by,
+\begin{equation} \label{eq1}
+\begin{aligned} f(\mathbf{Y}, \mathbf{Z}, \mathbf{U}, \boldsymbol{\Pi}, \boldsymbol{\Psi}, \mathbf{A} \mid \mathbf{B}, \boldsymbol{\beta}, \boldsymbol{\gamma} &)= P(S_1) \left[\prod_{t=2}^T P(S_t \mid S_{t-1}, \mathbf{A})\right]\prod_{m=1}^M P(\mathbf{A}_m) \\
+& \times \prod_{t=1}^T \prod_{p \in V_{1t}} f\left(\boldsymbol{\pi}_{pt} \mid \mathbf{X}_1, \boldsymbol{\beta}_{1}, S_t \right) \prod_{q \in V_{2t}} f\left(\boldsymbol{\psi}_{qt} \mid \mathbf{X}_2, \boldsymbol{\beta}_{2}, S_t \right) 
+\\
+& \times \prod_{t=1}^T \prod_{p, q \in V_{1t} \times V_{2t}} f\left(y_{p q t} \mid z_{p q t}, u_{p q t}, \mathbf{B}, \mathbf{D}, \boldsymbol{\gamma} \right) f\left(z_{p q t} \mid \boldsymbol{\pi}_{pt}\right) f\left(u_{p q t} \mid \boldsymbol{\psi}_{qt}\right) 
+\end{aligned}
+\end{equation}
+
+
+
+
+
+\subsection{Estimation}
+\subsubsection*{Marginalization}
+
+we derive a factorized approximation to the posterior distribution proportional to Equation~\ref{eq1} in order to drastically reduce the computation time required for inference. A typical approximating distribution
+would factorize over all latent variables. In the true posterior, however, latent group indicators (\textbf{z}, \textbf{u}) and the mixed-membership parameters ($\boldsymbol{\pi}$, $\boldsymbol{\psi}$) are usually strongly correlated \citep{teh2006collapsed}. Similarly, the Markov states (\textbf{S}) and parameters in the transition kernel (\textbf{A}) are typically highly correlated in the true posterior. 
+
+To avoid the strong assumption of independence induced by the standard factorized approximating distribution, therefore, we marginalize out the latent mixed-membership vectors and the Markov transition probabilities and then approximate the marginalized posterior. The details of the marginalization can be found in section~\ref{appendix:marginalization} of the supplementary information. For notational simplicity, let $s_{tm} = \mathbb{I}(S_t = m)$, $z_{pqt,g} = \mathbb{I}(z_{pqt} = g)$, and $u_{qpt,h} = \mathbb{I}(u_{qpt} = h)$, where $\mathbb{I}(\cdot)$ is the binary indicator function. Moreover, let $\alpha_{ptgm} = \exp \left(\mathbf{x}_{pt}^{\top}\boldsymbol{\beta}_{1gm} \right)$, $\xi_{ptm} = \sum_{g=1}^{K_1} \alpha_{pgm}$, and $\theta_{pqt, z_{pqt}, u_{qpt}} = \mathrm{logit}^{-1} (B_{z_{pqt},u_{pqt}} + \mathbf{d}_{pq}^\top \boldsymbol{\gamma})$, the resulting collapsed posterior is proportional to: 
+
+\begin{equation} \label{eq2}
+\begin{aligned} 
+f(\mathbf{Y}, \mathbf{Z},  \mathbf{U} \mid \mathbf{B}, \boldsymbol{\beta}, \gamma) & \propto \iiint f(\mathbf{Y}, \mathbf{Z}, \mathbf{U}, \boldsymbol{\Pi}, \boldsymbol{\Psi}, \mid \mathbf{B}, \boldsymbol{\beta}, \gamma) d \boldsymbol{\Pi} d \boldsymbol{\Psi}d \mathbf{A} \\
+&= P(s_1) \left[ \prod_{m=1}^M \frac{\Gamma(M \eta)}{\Gamma\left(M \eta+U_{m \cdot}\right)} \prod_{n=1}^M \frac{\Gamma\left(\eta+U_{m, n}\right)}{\Gamma(\eta)} \right]\\
+& \times \prod_{t=2}^T \prod_{m=1}^M \prod_{p \in V_{1t}} \left[ \frac{\Gamma\left(\xi_{ptm}\right)}{\Gamma \left( \xi_{ptm} + N_{2t} \right)}\prod_{g=1}^{K_1}\frac{ \Gamma\left( \alpha_{ptgm} + C_{ptg} \right)}{\Gamma\left(\alpha_{ptgm}\right)}  \right]^{s_{tm}} \\
+&\times \prod_{q \in V_{2t}}  \left[ \frac{\Gamma\left(\xi_{qtm}\right)}{\Gamma \left( \xi_{qtm} + N_{1t} \right)}\prod_{h=1}^{K_2}\frac{ \Gamma\left( \alpha_{qthm} + C_{qth} \right)}{\Gamma\left(\alpha_{qthm}\right)}  \right]^{s_{tm}}    \\
+& \times  \prod_{p, q \in V_{1t} \times V_{2t}}\left[ \prod_{g=1}^{K_1} \prod_{h=1}^{K_2} \left(\theta_{p q t, z_{p q t}, u_{p q t}}^{y_{p q t}}\left(1-\theta_{p q t, z_{p q t}, u_{p q t}}\right)^{1-y_{p q t}} \right)^{z_{pqt,g} \times u_{qpt,h}}\right. \\ 
+\end{aligned}
+\end{equation}
+
+where $\Gamma(\cdot)$ is the Gamma function. The marginalized joint distribution explicitly uses a number of sufficient statistics: $C_{pt,g} = \sum_{q \in V_{3t}} z_{pqt,g}$, which represent the number of times node $p$ in family 1 instantiates group $g$ across its interactions with all nodes $q$ in family 2 present at time $t$, whether as a sender or as a receiver ($C_{qt,h}$ is defined analogously); $U_{m n}=\sum_{t=2}^{T} I\left(S_{t}=n\right) I\left(S_{t-1}=m\right)$, which counts the number of times the
+hidden Markov process transitions from state $m$ to state $n$; and $U_{m}=\sum_{t=2}^{T} \sum_{n} I\left(S_{t}= n\right) I\left(S_{t-1}=m\right)$, which tracks the total number of times the Markov process transitions
+from $m$ (potentially to stay at $m$). 
+
+\subsubsection*{Stochastic Variational Inference}
+
+To improve the scalability of our proposed approach, we adopt two complementary strategies. First, we rely on a mean-field variational approximation to the collapsed posterior in Equation~\ref{eq2}, which first defines a factorized distribution $\tilde{Q}_{\mathbf{L}}$ over latent variables $\mathbf{L} = \{\mathbf{Z}, \mathbf{U}, \mathbf{S}\}$ and a corresponding lower bound $\mathcal{L}$ for the collapsed posterior. We then optimize this lower bound with respect to the variational parameters to approximate
+the true posterior over our latent variables. Using an EM algorithm, we iterate between finding an optimal $\tilde{Q}_{\mathbf{L}}$ (the E-step) and optimizing the corresponding lower bound with respect to the hyper-parameters $\mathbf{B}$, $\boldsymbol{\beta}$, and $\boldsymbol{\gamma}$ (the M-step). It has been shown that the type of marginalization scheme we implement improves the quality of the variational approximation in related contexts. 
+
+Second,  we rely on stochastic optimization to find the maximum of the lower bound. With decreasing step sizes, our algorithm follows a noisy estimate of the gradient of $\mathcal{L}$ formed by subsampling dyads in the original network. When using the correct schedule for the step-sizes, this procedure is guaranteed to find a local optimum of the lower bound without the need to perform a costly update over the parameters associated with all dyads at every iteration. Details of our exact estimation procedures — including the formal procedure of our estimation algorithm, the required gradients and hessian computations, initial values for all relevant parameters and latent variables, and sub-network sampling strategy  — are available in Appendix~\ref{appendix:em}.
+
+
+
+
+\FloatBarrier
+\section{Empirical Application: State–IO Network (1965–2014)}
+Networks that link states to IGOs are inherently bipartite and dynamic, requiring researchers to capture changing group dynamics both among states and among IGOs over time. Our model offers several theoretical and practical advantages. Bipartite modeling directly captures the distinct roles of states and IGOs, avoiding projection-induced distortions \citep{lo2023statistical}. For example, projecting shared IO membership onto a unipartite state network creates artificial ties that misrepresent the actual organizational landscape. This distortion inflates the perception of state clusters, which can obscure meaningful group dynamics. By keeping the bipartite structure intact, our model maintains the integrity of the original network. Incorporating a dynamic element further enhances the model’s validity by accommodating temporal variation in state–IO affiliations. International cooperation is fluid, shaped by shifting political, economic, and diplomatic contexts. States may join or exit IGOs in response to foreign policy changes, leadership shifts, or emerging crises. Similarly, IGOs adjust their membership structures and issue priorities to respond to evolving governance needs. By integrating these temporal dynamics, our model uncovers the dynamic drivers and change points behind state–IO affiliations \citep{olivella2022dynamic}.
+
+Substantively, modeling the state-IO network dynamically acknowledges that international cooperation is fluid and contingent upon changing political, economic, and diplomatic contexts. States may join or exit IGOs in response to changes in foreign policy priorities, leadership changes, or global governance initiatives. Likewise, IGOs themselves may adapt their membership structures, issue agendas, or operational frameworks in response to emerging challenges \citep{davis2023discriminatory}. By incorporating both bipartite structure and temporal evolution, we are able to identify crucial predictors for formal and persistent international cooperation, offering deeper insights into the mechanisms of international cooperation. We incorporate both state-level and IO-level covariates, such as state UN voting ideal points and IO issue area focuses, enabling us to examine how different types of states join distinct types of IGOs.
+
+We apply the \textbf{DB-MMSBM} to yearly state–IO membership data between 1965–2014, covering 200 countries/regions and 471 IGOs \citep{pevehouse2020tracking, davis2021forces}. We estimate three groups for both states (top row) and IGOs (bottom row). Figure~\ref{BM_application} plots the estimated blockmodel. 
+
+\begin{figure}[h!]
+\centering
+\includegraphics[width=0.7\linewidth]{application/bm.pdf}
+\caption{\small Estimated blockmodel for the state–IO network. Node sizes reflect aggregate membership; edge darkness indicates tie probabilities between groups.}\label{BM_application}
+\end{figure}
+
+\begin{table}[H]
+\centering 
+\begin{tabular}{ccc|ccc}
+\toprule
+\multicolumn{3}{c}{States} & \multicolumn{3}{c}{IOs} \\
+\midrule
+  Internationalists & Materialists & Isolationists  & Universal & Exclusive & Local \\
+\midrule
+  United Kingdom & Namibia & Palau & UN & OECD & ACC \\
+  France & India & Andorra & ITU & EU & SCO \\
+  Netherlands & Mongolia & North Korea & IAEA & NATO & ECOWAS  \\
+  Germany (West) & Philippines &  Samoa & ILO & IEA & CACO  \\
+  Italy &  Tanzania & Toga & IMF & IOM & EADB \\
+    Denmark &  Indonesia & Monaco & INTERPOL & CERN & RCC \\
+      Japan &  Sri Lanka & Belarus & FAO & OIV & EuADB \\
+        Canada &  Kenya & Germany (East) & WTO & BIS & EAEC \\
+          United States &  Malaysia & Taiwan & ICC & COE & MERCOSUR \\
+\bottomrule
+\end{tabular}
+\caption{\textbf{Selected examples of countries/IOs in each latent group.} Ten examples are chosen from the top 50 countries/IOs with the highest average rate of membership in each latent group. See Appendix XX for the full top 50 list of latent group classification with corresponding average rate of membership.}
+\end{table}
+
+
+
+
+\emph{State Groups:}
+\begin{itemize}
+    \item \textbf{S1 (Internationalists)}: Most likely to join many IGOs in I1 and I3.
+    \item \textbf{S2 (Materialists)}: Most populous state group; highly likely to join I1 IGOs, unlikely to join I2 or I3.
+    \item \textbf{S3 (Isolationists)}: Few states; low likelihood of joining IGOs in any group.
+\end{itemize}
+
+\emph{IO Groups:}
+\begin{itemize}
+    \item \textbf{I1 (Universal IGOs)}: Attract many states across groups.
+    \item \textbf{I2 (Local IGOs)}: Large number of IGOs unlikely to connect to any state group.
+    \item \textbf{I3 (Exclusive IGOs)}: Few IGOs that only interact with S1 states.
+\end{itemize}
+
+
+
+Table~\ref{coef_table} presents the coefficient estimates. The model performs well in recovering the underlying relationships between nodes. Liberal and democratic states are more likely to join IGOs that align closely with their geopolitical goals. In contrast, geopolitical alignment is less predictive of IO memberships among illiberal and autocratic states, which place greater emphasis on the economic and material benefits offered by IGOs. This underscores how latent groups of states pursue divergent strategies in shaping their political networks. Our findings contribute to the ongoing debate over whether states join IOs primarily for reasons of geopolitical alignment or material gain. We find evidence for both: liberal and democratic states are more consistent with the former explanation, whereas illiberal and autocratic states are more consistent with the latter.
+
+\begin{table}[h!]
+
+\centering
+\begin{tabular}{lccc|ccc}
+\toprule
+Predictor & Internationalist & Materialist & Isolationist & Local & Open & Exclusive \\
+\midrule
+UN IP & -0.59 & -2.26 & -0.83 & & & \\
+ & (0.29) & (0.26) & (0.25) & & & \\
+V-Dem & 2.95 & 3.97 & 0.68 & & & \\
+ & (0.63) & (0.72) & (0.71) & & & \\
+GDP per capita & 0.25 & 0.02 & -0.05 & & & \\
+ & (0.07) & (0.06) & (0.08) & & & \\
+Europe & 1.33 & -2.61 & 0.37 & & & \\
+ & (0.50) & (0.47) & (0.46) & & & \\
+\midrule
+Ideal point (lagged) & & & & -2.70 & -2.73 & -0.39 \\
+ & & & & (0.29) & (0.28) & (0.25) \\
+Regional IO & & & & 0.72 & 0.80 & -0.05 \\
+ & & & & (0.51) & (0.57) & (0.53) \\
+Mem. Size (lagged) & & & & 0.00 & -0.05 & -0.01 \\
+ & & & & (0.01) & (0.01) & (0.01) \\
+Entry Barrier & & & & -0.16 & -0.12 & -0.23 \\
+ & & & & (0.57) & (0.57) & (0.63) \\
+\midrule
+\multicolumn{7}{l}{$N$ State Nodes: 200; $N$ IO Nodes: 471; $N$ Dyads: 2,370,104; $N$ Time Periods: 50} \\
+\bottomrule
+\end{tabular}
+\caption{\small \textbf{Estimated Coefficients and their Standard Errors.} The table shows the estimated coefficients (and standard errors) of the monadic predictors for each of three latent groups in both state (top) and IO (bottom) family. The estimated coefficients for intercepts, cubic splines, and indicators for variable missingness are not shown.} \label{coef_table}
+\end{table}
+
+
+Finally, Figure~\ref{dynamic} shows that mixed-membership probabilities also vary with major international events (e.g., end of the Cold War, EU enlargement). The model captures both gradual and abrupt changes.
+
+\begin{figure}[h!]
+\centering
+\includegraphics[width=\linewidth]{application/state_membership.jpg}
+\caption{\small \textbf{Mixed-membership dynamics for selected states}, showing shifts aligned with key events. The x-axis shows the period of observation between 1965-2014, the y-axis shows the average rate of membership in three latent groups in each year the
+country is present in the network.} \label{dynamic}
+\end{figure}
+
+
+\begin{figure}[h!]
+\centering
+\includegraphics[width=\linewidth]{application/io_membership.jpg}
+\caption{\small \textbf{Mixed-membership dynamics for selected IOs}, showing shifts aligned with key events. The x-axis shows the period of observation between 1965-2014, the y-axis shows the average rate of membership in three latent groups in each year the
+IO is present in the network.} \label{dynamic}
+\end{figure}
+
+
+
+\FloatBarrier
+\bibliographystyle{apsr}
+\setlength{\bibsep}{0pt}
+\bibliography{reference.bib}
+
+\section*{Comments from Polmeth and PolNet}
+
+\begin{itemize}
+    \item There are other potential applications of the model beyond political science, which could be framed as our contributions. For example, the network between firms and products. 
+    \item Is there a more straightforward way to interpret the latent states?
+    \item Molly Roberts mentioned the connection between our model and their topic model.
+    \item Erin asked about whether our findings are new to applied researchers. More emphasis on what we learned from the application that is lacking in existing studies on IOs.
+    \item Yuki asked how did we select the number of groups in each family, and if there is a more disciplined way of choosing \textit{k} (similar question from Shahryar).
+    \item How did we deal with the unbalanced panel data? It is intuitive that we consider a node as not having any edges with other nodes until it exists, but an explicit discussion about whether it has any implication for estimation would be helpful.
+    \item From Nick Beauchamp: Have we tried converting the code into Stan? 
+\end{itemize}
+
+
+
+\newpage
+
+\appendix
+\begin{center}
+    {\bf {\Large Appendix}}
+\end{center}
+
+\section{Empirical Studies on State-IO Membership}
+\renewcommand{\thetable}{A\arabic{table}}
+\renewcommand{\thefigure}{A\arabic{figure}}
+\setcounter{figure}{0}
+\setcounter{table}{0}
+\renewcommand\theHtable{Appendix.\thetable}
+\renewcommand\theHfigure{Appendix.\thefigure}
+\begin{table}[H]
+\centering
+\renewcommand{\arraystretch}{1.3}
+\begin{tabular}{p{0.2\textwidth} p{0.5\textwidth} p{0.25\textwidth}}
+\hline
+\textbf{Article} & \textbf{Dynamic in the State–IO network} & \textbf{Network Structure}\\ \hline
+
+von Borzyskowski and Vabulas (2019 RIO) & preference divergence; contagion $\to$ IO withdrawal & State-IO dyads \\
+
+Choi (2022 RIO) & Nationalism $\to$ IO withdrawal & State-IO dyads \\
+Dijkstra and Ghassim (2024 RIO) & preference divergence; regime type $\to$ IO withdrawal & State-IO dyads\\
+Poast and Urpelainen (2013 ISQ) & Democratization $\to$ forming IOs & State monads (Project IOs onto state network)\\
+Cottiero and Haggard (2023 ISQ) & Autocratic IOs $\to$ autocratization &  State monads (Project IOs onto state network) \\
+Simmons and Denner (2010 IO) & Democracy $\to$ joining human-rights IOs & State-IO dyads\\
+Mansfield and Pevehouse (2006 IO) & Democratization $\to$ joining IOs  &  State monads (Project IOs onto state network)\\
+Davis and Wilf (2017 JOP) & Political ties $\to$ GATT/WTO membership & State-IO dyads \\
+Davis and Pratt (2020 RIO) & Alliance $\to$ Co-membership in economic IOs & State-state dyads (Project IOs onto state network)\\
+Lenz et al. (2023 RIO) & Democracy $\to$ IO delegation & IO monads (Project states onto IO network)\\
+
+Hafner-Burton and Montgomery (2006 JCR) & state centrality in IO network $\to$ less conflict & State-state dyads (Project IOs onto state network) \\
+
+
+Lupu and Greenhill (2017 ISQ) & State co-clustering in IO network $\to$ less conflict & State-state dyads (Project IOs onto state network) \\
+Sommerer, Tallberg, and Squatrito (2019 IO) & IO connectivity \& membership overlap $\to$ policy convergence & IO-IO dyads (Project states onto IO network)\\
+Tallberg and Vikberg (2025) & Democracy $\to$ Task-specific IOs & IO monads (Project states onto IO network) \\
+
+\hline
+\end{tabular}
+\caption{Articles (2005–2025) in top political science and international relations journals focusing on membership ties between states and international organizations.}
+\label{lit_table_io}
+\end{table}
+
+
+
+\section{Additional methodological details}
+\renewcommand{\thetable}{B\arabic{table}}
+\renewcommand{\thefigure}{B\arabic{figure}}
+\setcounter{figure}{0}
+\setcounter{table}{0}
+\renewcommand\theHtable{Appendix.\thetable}
+\renewcommand\theHfigure{Appendix.\thefigure}
+\subsection{Plate Diagram of the Proposed Model}
+ \begin{figure}[!h]
+  \begin{center}
+  \begin{tabular}{c}
+        \centering
+        \includegraphics[width=0.75\linewidth]{simulation/DAG_horizontal.pdf}
+\end{tabular}
+        \caption{Plate diagram of the proposed model. Observed data represented as shaded nodes; hyperparameters presented as nodes outside plates}\label{model}
+\end{center}
+    \end{figure}
+
+\subsection{Marginalizing the membership vectors and the transition
+probabilities}\label{appendix:marginalization}
+
+\subsubsection{Marginalizing $\boldsymbol{\Pi}$}
+\label{appendix:mar_pi}
+In this appendix, we show how to marginalize $\boldsymbol{\Pi}$. We start by collecting and integrating all terms that contain $\pi$:
+
+$$
+\int \cdots \int \prod_{t=1}^T  \prod_{p \in V_{1t}}\biggl[P\left(\boldsymbol{\pi}_{pt} \mid \mathbf{X}, \boldsymbol{\beta}_1, S_t\right)\biggr] \prod_{qt \in V_{2t}} P\left(\mathbf{z}_{pqt} \mid \boldsymbol{\pi}_{pt}\right)  \mathrm{d} \boldsymbol{\pi}_{1t} \ldots \mathrm{d} \boldsymbol{\pi}_{N_{1t}}
+$$
+
+Denote $\alpha_{ptgm} = \exp \left(\mathbf{x}_{pt}^{\top}\boldsymbol{\beta}_{1gm} \right)$, and $\xi_{ptm} = \sum_{g=1}^{K_1} \alpha_{pgm}$, then $\boldsymbol{\pi}_{pt} \mid \xi_{ptm} \sim \text{Dir}(\xi_{ptm})$. Therefore, plugging in the PDF for Dirichlet yields: 
+
+$$\prod_{t=1}^{T} \prod_{p \in V_{1t}} \int \prod_{m=1}^{M}\left[\frac{\Gamma\left(\xi_{p t m}\right)}{\prod_{g=1}^{K_1} \Gamma\left(\alpha_{p t g m}\right)} \prod_{g=1}^{K_1} \pi_{p t g}^{\alpha_{p t g m}-1}\right]^{s_{tm}} \prod_{q \in V_{2t}} \prod_{g=1}^{K_1} \pi_{p t g}^{z_{pqt, g}}  \mathrm{~d} \boldsymbol{\pi}_{p t}$$
+
+, where $z_{pqt,g} = \mathbb{I}(z_{pqt} = g)$. Define $C_{ptg} = \sum_{q \in V_{2t}} z_{pqt,g}$. Since for indicator function $s_{tm} = \mathbb{I}(S_t = m)$, $\sum_m s_{tm}x = \prod_m x^{s_{tm}}$, this expression is equivalent to:
+
+$$\prod_{t=1}^{T} \prod_{p \in V_{1t}}  \prod_{m=1}^{M}\left[\frac{\Gamma\left(\xi_{p t m}\right)}{\prod_{g=1}^{K_1} \Gamma\left(\alpha_{p t g m}\right)}\right]^{s_{tm}} \int \prod_{g=1}^{K_1} \pi_{p t g}^{\sum_{m=1}^M s_{tm} \alpha_{p t g m}+C_{p t g}-1} \mathrm{~d} \boldsymbol{\pi}_{p t} $$
+
+The integrand can be recognized as the kernel of a Dirichlet distribution. As the integral is over the entire support of this Dirichlet and must integrate to one, we can compute it as the inverse of the corresponding normalizing constant:
+
+$$
+\prod_{t=1}^T \prod_{p \in V_{1t}} \prod_{m=1}^M \left[ \frac{\Gamma\left(\xi_{ptm}\right)}{\prod_{g=1}^{K_1} \Gamma\left(\alpha_{ptgm}\right)} \right]^{s_{tm}} \frac{\prod_{g=1}^{K_1} \Gamma\left( \sum_{m=1}^M s_{tm}\alpha_{ptgm} + C_{ptg} \right)}{\Gamma \left(\sum_{m=1}^{M} s_{tm}\xi_{ptm} + N_{2t} \right)}
+$$
+, where $N_{2t}$ is the number of nodes in family 2 at time $t$. Apply the indicator trick again and rearranging the factorals:
+
+\begin{equation*} 
+\prod_{t=1}^T \prod_{p \in V_{1t}} \prod_{m=1}^M \left[ \frac{\Gamma\left(\xi_{ptm}\right)}{\Gamma \left( \xi_{ptm} + N_{2t} \right)}\prod_{g=1}^{K_1}\frac{ \Gamma\left( \alpha_{ptgm} + C_{ptg} \right)}{\Gamma\left(\alpha_{ptgm}\right)}  \right]^{s_{tm}}  
+\end{equation*}
+
+\subsubsection{Marginalizing \boldsymbol{\Psi}}
+\label{appendix:mar_psi}
+Collect and integrate all terms that contain $\psi$:
+
+$$
+\int \cdots \int \prod_{t=1}^T  \prod_{q \in V_{2t}}\biggl[P\left(\boldsymbol{\psi}_{qt} \mid \mathbf{X}, \boldsymbol{\beta}_2, S_t\right)\biggr] \prod_{pt \in V_{1t}} P\left(\mathbf{u}_{pqt} \mid \boldsymbol{\psi}_{qt}\right)  \mathrm{d} \boldsymbol{\psi}_{1t} \ldots \mathrm{d} \boldsymbol{\psi}_{N_{2t}}
+$$
+Following a similar strategy as 2.1 yields:
+
+\begin{equation*} 
+\prod_{t=1}^T \prod_{q \in V_{2t}} \prod_{m=1}^M \left[ \frac{\Gamma\left(\xi_{qtm}\right)}{\Gamma \left( \xi_{qtm} + N_{1t} \right)}\prod_{h=1}^{K_2}\frac{ \Gamma\left( \alpha_{qthm} + C_{qth} \right)}{\Gamma\left(\alpha_{qthm}\right)}  \right]^{s_{tm}}  
+\end{equation*}
+, where $C_{qth} = \sum_{p \in V_{1t}} \mathbb{I}(u_{qp,t} = h)$, $\alpha_{qthm} = \exp \left(\mathbf{x}_{qt}^{\top}\boldsymbol{\beta}_{2hm} \right)$, and $\xi_{qtm} = \sum_{h=1}^{K_2} \alpha_{qhm}$.
+
+\subsubsection{Marginalizing A}
+\label{appendix:mar_a}
+Since the transition probabilities have independent Dirichlet priors, and they are conjugate to the multinomial distribution over states at any given time, we can follow a similar strategy when collapsing the rows of \(\mathbf{A}\). More specifically, and focusing on the portion of the joint distribution
+that involves \(\mathbf{A}\), we have
+
+\begin{equation*} 
+    \begin{aligned}
+    \int \cdots \int \prod_{t=2}^{T} P\left(s_{t} \mid s_{t-1},  \mathbf{A}\right) & \prod_{m} P\left(\mathbf{A}_{m}\right) \mathrm{d} \mathbf{A}_{1} \cdots \mathrm{d} \mathbf{A}_{M} = \\
+    & \int \cdots \int \prod_{t=2}^{T} \prod_{m} \prod_{n} A_{m, n}^{s_{t, n} \times s_{t-1, m}} \prod_{m} \frac{\Gamma(M \eta)}{\prod_{n} \Gamma(\eta)} \prod_{n} A_{m, n}^{\eta-1} \mathrm{~d} \mathbf{A}_{1} \cdots \mathrm{d} \mathbf{A}_{M} \\
+    &= \prod_{m} \frac{\Gamma(M \eta)}{\Gamma\left(M \eta+U_{m \cdot}\right)} \prod_{n} \frac{\Gamma\left(\eta+U_{m, n}\right)}{\Gamma(\eta)}
+    \end{aligned}
+\end{equation*}
+
+, where \(U_{m, n}=\sum_{t=2}^{T} s_{t, n} s_{t-1, m}\) is the number of times the Markov chain transitions from state \(m\) to
+state \(n\), and \(U_{m \cdot}=\sum_{t=2}^{T} \sum_{n} s_{t, n} s_{t-1, m}\) is the total number of times the Markov chain transitions
+from \(m\) (potentially to stay at \(m\)). \(\eta\) is the hyperprior concentration parameter of a symmetric Dirichlet distribution.
+
+\subsubsection{Marginalized Joint Distribution}
+
+Plugging the results from Section~\ref{appendix:mar_pi} to \ref{appendix:mar_a} back into Equation~\ref{eq1}, we can get the joint distribution collapsed over the mixed-membership vectors and the transition matrix.
+
+\begin{equation} 
+\begin{aligned} 
+f(\mathbf{Y}, \mathbf{Z},  \mathbf{U} \mid \mathbf{B}, \boldsymbol{\beta}, \gamma) & = \iiint f(\mathbf{Y}, \mathbf{Z}, \mathbf{U}, \boldsymbol{\Pi}, \boldsymbol{\Psi}, \mid \mathbf{B}, \boldsymbol{\beta}, \gamma) d \boldsymbol{\Pi} d \boldsymbol{\Psi}d \mathbf{A} \\
+&= P(s_1) \left[ \prod_{m=1}^M \frac{\Gamma(M \eta)}{\Gamma\left(M \eta+U_{m \cdot}\right)} \prod_{n=1}^M \frac{\Gamma\left(\eta+U_{m, n}\right)}{\Gamma(\eta)} \right]\\
+& \times \prod_{t=2}^T \prod_{m=1}^M \prod_{p \in V_{1t}} \left[ \frac{\Gamma\left(\xi_{ptm}\right)}{\Gamma \left( \xi_{ptm} + N_{2t} \right)}\prod_{g=1}^{K_1}\frac{ \Gamma\left( \alpha_{ptgm} + C_{ptg} \right)}{\Gamma\left(\alpha_{ptgm}\right)}  \right]^{s_{tm}} \\
+&\times \prod_{q \in V_{2t}}  \left[ \frac{\Gamma\left(\xi_{qtm}\right)}{\Gamma \left( \xi_{qtm} + N_{1t} \right)}\prod_{h=1}^{K_2}\frac{ \Gamma\left( \alpha_{qthm} + C_{qth} \right)}{\Gamma\left(\alpha_{qthm}\right)}  \right]^{s_{tm}}    \\
+& \times  \prod_{p, q \in V_{1t} \times V_{2t}}\left[ \prod_{g=1}^{K_1} \prod_{h=1}^{K_2} \left(\theta_{p q t, z_{p q t}, u_{p q t}}^{y_{p q t}}\left(1-\theta_{p q t, z_{p q t}, u_{p q t}}\right)^{1-y_{p q t}} \right)^{z_{pqt,g} \times u_{qpt,h}}\right. \\ 
+\end{aligned}
+\end{equation}
+
+, where $\theta_{pqt, z_{pqt}, u_{qpt}} = \mathrm{logit}^{-1} (B_{z_{pqt},u_{pqt}} + \mathbf{d}_{pq}^\top \boldsymbol{\gamma})$ is the probability of a tie formation between $p$ in family 1 and $q$ in family 2 at time $t$. The corresponding logarithm for the posterior function is therefore:
+
+\begin{equation} \label{eq:log-posterior}
+    \begin{aligned}
+\log f(\mathbf{Y}, \mathbf{Z},  \mathbf{U} & \mid \mathbf{B}, \boldsymbol{\beta}, \gamma) = \log P(s_1) \\
++ & \sum_{m=1}^{M} \Bigg[ \log \Gamma(M\eta) - \log \Gamma(M\eta + U_{m\cdot}) \Bigg] + \sum_{m=1}^{M} \sum_{n=1}^{M} \Bigg[ \log \Gamma(\eta + U_{mn}) - \log \Gamma(\eta) \Bigg] \\
++ & \sum_{t=2}^{T} \sum_{m=1}^{M} s_{tm} \Bigg\{\\
+& \sum_{p \in V_{1t}} \Bigg[ \log \Gamma(\xi_{ptm}) - \log \Gamma(\xi_{ptm} + N_{2t}) + \sum_{g=1}^{K1} \bigg( \log \Gamma(\alpha_{ptgm} + C_{ptg}) - \log \Gamma(\alpha_{ptgm}) \bigg) \Bigg] \\
++ & \sum_{q \in V_{2t}} \Bigg[ \log \Gamma(\xi_{qtm}) - \log \Gamma(\xi_{qtm} + N_{1t}) + \sum_{h=1}^{K2} \bigg( \log \Gamma(\alpha_{qthm} + C_{qth}) - \log \Gamma(\alpha_{qthm}) \bigg) \Bigg] \Bigg\} \\
++ & \sum_{t=2}^{T} \sum_{p,q \in V_{1t} \times V_{2t}} \sum_{g=1}^{K1} \sum_{h=1}^{K2} \big( z_{pqt,g} \times u_{qpt,h}\big) \bigg( y_{pqt} \log \theta_{pqt,z,u} + (1-y_{pqt}) \log (1 - \theta_{pqt,z,u}) \bigg)
+\end{aligned}
+\end{equation}
+
+
+\subsection{Details of the Estimation Algorithm}
+\label{appendix:em}
+
+Define a factorized distribution over the latent variables $\mathbf{L} := \{\mathbf{Z}, \mathbf{U}, \mathbf{S}\}$:
+
+\begin{equation*}
+    \tilde{Q}(\mathbf{L} \mid \boldsymbol{\Phi}, \boldsymbol{\Lambda}, \boldsymbol{\Delta}) = \prod_{t=1}^T Q_1(\mathbf{s}_t \mid \boldsymbol{\phi}_t) \prod_{p,q \in V_{1t} \times V_{2t}} Q_2(\mathbf{z}_{pq,t} \mid \boldsymbol{\lambda}_{pq,t}) Q_2(\mathbf{u}_{qp,t} \mid \boldsymbol{\delta}_{qp,t})
+\end{equation*}
+, where $\boldsymbol{\phi}_t$, $\boldsymbol{\lambda}_{pq,t}$, and $\boldsymbol{\delta}_{qp.t}$ are variational parameters. Our factorized approximation assumes the latent state variables are independent in the collapsed space. This is a strong assumption, but one that has been found to strike a good balance between accuracy and scalability \citep[See][]{wang2013collapsed}. We can then find the lower bound for the log marginal probability of the network data $\mathbf{Y}$ by applying Jensen's inequality:
+
+\begin{equation*}
+    P(\mathbf{Y} \mid \boldsymbol{\beta}, \boldsymbol{\gamma}, \mathbf{B}) \geq \mathcal{L} := \mathbb{E}_{\widetilde{Q}}\left[ \log P \left( \mathbf{Y}, \mathbf{L} \mid \boldsymbol{\beta}, \boldsymbol{\gamma}, \mathbf{B} \right) \right] - \mathbb{E}_{\widetilde{Q}}\left[ \log \widetilde{Q}(\mathbf{L} \mid \boldsymbol{\Phi}, \boldsymbol{\Lambda}, \boldsymbol{\Delta}) \right]
+\end{equation*}
+
+The full expression of the lower bound $\mathcal{L}$ can be written as:
+
+\begin{equation} \label{eq:lb}
+\begin{aligned}
+    \mathcal{L}(\widetilde{Q}) &= \mathbb{E}_{\widetilde{Q}}\left[ \log P \left( \mathbf{Y}, \mathbf{L} \mid \boldsymbol{\beta_1}, \boldsymbol{\beta}_2, \boldsymbol{\gamma}, \mathbf{B}, \mathbf{X}_1, \mathbf{X}_2, \mathbf{D}\right) \right] - \mathbb{E}_{\widetilde{Q}}\left[ \log \widetilde{Q}(\mathbf{L} \mid \boldsymbol{\Phi}, \boldsymbol{\Lambda}, \boldsymbol{\Delta}) \right] \\
+    &= \log \left(P\left(s_{1}\right)\right)+\log \Gamma(M \eta)-\sum_{m} \mathbb{E}_{\tilde{Q}}\left[\log \Gamma\left(M \eta+U_{m\cdot}\right)\right]+\sum_{m, n} \mathbb{E}_{\tilde{Q}}\left[\log \Gamma\left(\eta+U_{m, n}\right)\right]-\log \Gamma(\eta)\\
+    & + \sum_{t, m}\phi_{tm} \sum_{p \in V_{1,t}} \left[ \Gamma(\xi_{ptm}) -  \Gamma(\xi_{ptm} + N_{2t}) \right] +  \sum_{t, m}\phi_{tm} \sum_{p \in V_{1,t}} \sum_{g=1}^{K_1} \left[ \mathbb{E}_{\tilde{Q}}\left[\log \Gamma(\alpha_{ptgm} + C_{ptg}) \right] - \log \Gamma(\alpha_{ptgm}) \right]\\
+    & + \sum_{t, m}\phi_{tm} \sum_{q \in V_{2,t}} \left[ \Gamma(\xi_{qtm}) -  \Gamma(\xi_{qtm} + N_{1t}) \right] +  \sum_{t, m}\phi_{tm} \sum_{q \in V_{2,t}} \sum_{h=1}^{K_2} \left[ \mathbb{E}_{\tilde{Q}}\left[\log \Gamma(\alpha_{qtgm} + C_{qth}) \right] - \log \Gamma(\alpha_{qthm}) \right] \\
+    & +\sum_{t}\sum_{(p, q) \in V_{1t} \times V_{2t}} \sum_{g=1}^{K_{1}} \sum_{h=1}^{K_{2}} \lambda_{p q, g} \delta_{p q, h}\left\{y_{p q t} \log \theta_{p q g h t}+\left(1-y_{p q t}\right) \log \left(1-\theta_{p q g h t}\right)\right\} \\
+    &-\sum_{g=1}^{K_1} \sum_{h=1}^{K_2} \frac{\left(B_{g h}-\mu_{g h}\right)^{2}}{2 \sigma_{g h}^{2}}-\sum_{j=1}^{J_{d}} \frac{\left(\gamma_{j}-\mu_{\gamma}\right)^{2}}{2 \sigma_{\gamma}^{2}}-\sum_{g=1}^{K_{1}} \sum_{j=1}^{J_{1 x}} \sum_{m=1}^M \frac{\left(\beta_{1 g j m}-\mu_{\beta_{1}}\right)^{2}}{2 \sigma_{\beta_{1}}^{2}}-\sum_{h=1}^{K_{2}} \sum_{j=1}^{J_{2 x}} \sum_{m=1}^M \frac{\left(\beta_{2 h j m}-\mu_{\beta_{2}}\right)^{2}}{2 \sigma_{\beta_{2}}^{2}} \\ 
+    %& - \textcolor{blue}{\sum_{g=1}^{K_{1}} \sum_{m=1}^M \frac{\nu + 1}{2} \log(1 + \frac{\beta_{1\cdot 0}^2}{\nu})} - \textcolor{blue}{\sum_{h=1}^{K_{2}} \sum_{m=1}^M \frac{\nu + 1}{2} \log(1 + \frac{\beta_{2\cdot 0}^2}{\nu})} 
+    \\
+    &- \sum_{t,m} \phi_{tm} \log(\phi_{t,m})  - \sum_{(p, q) \in V_{1t} \times V_{2t}} \sum_{g=1}^{K_{1}} \sum_{h=1}^{K_{2}}\left\{\lambda_{p q g t} \log (\lambda_{p q g t})-\delta_{q p h t} \log \left(\delta_{q p h t}\right)\right\} 
+\end{aligned}
+\end{equation}
+
+
+To approximate the true posterior over the latent variables, we optimize this lower bound by iterating between finding an optimal $\widetilde{Q}$ (the E-step) and optimizing the corresponding lower bound with respect to the hyper-parameters $\mathbf{B}, \boldsymbol{\beta}, \boldsymbol{\gamma}$ (the M-step).
+ 
+\subsubsection{E step 1: Z and U}
+
+Variational parameters $\lambda_{pqt}$ and $\delta_{pqt}$ are updated by restricting Equation~\ref{eq:log-posterior} to the terms that only contain $\mathbf{z}_{pqt}$ and $\mathbf{u}_{pqt}$ and taking the logarithm of the resulting expression. First, consider $\mathbf{z}_{pqt}$:
+
+\begin{equation*}
+\begin{aligned} 
+ \log & P\left(\mathbf{Y}, \mathbf{L} \mid \mathbf{B}, \boldsymbol{\beta}_{1}, \boldsymbol{\beta}_{2}, \boldsymbol{\gamma}, \mathbf{X}_{1}, \mathbf{X}_{2}, \mathbf{D}\right) \\
+ &= z_{p q g t} \sum_{h=1}^{K_{2}} u_{p q h t}\left\{Y_{p q t} \log \left(\theta_{p q g h t}\right)+\left(1 - Y_{p q t}\right) \log \left(1-\theta_{p q g h t}\right)\right\} \\
+ &+ \sum_{m=1}^M s_{tm} \log \Gamma\left(\alpha_{p g t m}+C_{p g t}\right)+\text { const. } \end{aligned}
+\end{equation*}
+
+Note that \(C_{p g t}=C_{p g t}^{\prime}+z_{p q t g}\) and that, for \(x \in\{0,1\}, \Gamma(y+x)=y^{x} \Gamma(y)\). Since
+the \(z_{p q t g} \in\{0,1\}\), we can re-express \(\log \Gamma\left(\alpha_{p t m g}+C_{p t g}\right)=z_{p q t k} \log \left(\alpha_{p t m g}+C_{p t g}^{\prime}\right)+\)
+\(\log \Gamma\left(\alpha_{p t m g}+C_{p t g}^{\prime}\right)\) and thus simplify the expression to
+
+\begin{equation*}
+\begin{aligned} 
+ \log & P\left(\mathbf{Y}, \mathbf{L} \mid \mathbf{B}, \boldsymbol{\beta}_{1}, \boldsymbol{\beta}_{2}, \boldsymbol{\gamma}, \mathbf{X}_{1}, \mathbf{X}_{2}, \mathbf{D}\right) \\
+ &= z_{p q g t} \sum_{h=1}^{K_{2}} u_{p q h t}\left\{Y_{p q t} \log \left(\theta_{p q g h t}\right)+\left(1 - Y_{p q t}\right) \log \left(1-\theta_{p q g h t}\right)\right\} \\
+ &+ z_{p q g t} \sum_{m=1}^M s_{tm} \log \Gamma\left(\alpha_{p g t m}+C'_{p g t}\right)+\text { const. } \end{aligned}
+\end{equation*}
+
+We proceed by taking the expectation of $\tilde{Q}(-z)$ under the variational distribution $\tilde{Q}$:
+
+\begin{equation*}
+\begin{aligned} 
+\mathbb{E}_{\tilde{Q}} [ \log & P\left(\mathbf{Y}, \mathbf{L} \mid \mathbf{B}, \boldsymbol{\beta}_{1}, \boldsymbol{\beta}_{2}, \boldsymbol{\gamma}, \mathbf{X}_{1}, \mathbf{X}_{2}, \mathbf{D}\right) ] \\
+ &= z_{p q g t} \sum_{h=1}^{K_{2}} \mathbb{E}_{\tilde{Q}_2} (u_{p q h t})\left\{Y_{p q t} \log \left(\theta_{p q g h t}\right)+\left(1 - Y_{p q t}\right) \log \left(1-\theta_{p q g h t}\right)\right\} \\
+ &+ z_{p q g t} \sum_{m=1}^M \mathbb{E}_{\tilde{Q}_1} (s_{tm}) \log \Gamma\left(\alpha_{p g t m}+C'_{p g t}\right)+\text { const. } 
+ \end{aligned}
+\end{equation*}
+
+
+The exponential of this expression corresponds to the (unnormalized) parameter vector of a multinomial distribution $\tilde{Q}_2$:
+
+\begin{equation*}
+\begin{aligned}
+\hat \lambda_{pqtg} & \propto \exp \left[z_{p q g t} \sum_{h=1}^{K_{2}} \mathbb{E}_{\tilde{Q}_2} (u_{p q h t})\left\{Y_{p q t} \log \left(\theta_{p q g h t}\right)+\left(1 - Y_{p q t}\right) \log \left(1-\theta_{p q g h t}\right)\right\}  \right] \\
+& \times \exp \left[ z_{p q g t} \sum_{m=1}^M \mathbb{E}_{\tilde{Q}_1} (s_{tm}) \log \Gamma\left(\alpha_{p g t m}+C'_{p g t}\right)\right]
+\end{aligned}
+\end{equation*}
+
+Analogously, the update for $\mathbf{u}_{qp}$ is similarly derived:
+
+\begin{equation*}
+\begin{aligned} 
+\mathbb{E}_{\tilde{Q}} \log & P\left(\mathbf{Y}, \mathbf{L} \mid \mathbf{B}, \boldsymbol{\beta}_{1}, \boldsymbol{\beta}_{2}, \boldsymbol{\gamma}, \mathbf{X}_{1}, \mathbf{X}_{2}, \mathbf{D}\right)  \\
+ &= u_{p q h t} \sum_{g=1}^{K_{1}} \mathbb{E}_{\tilde{Q}_2} (z_{p q g t})\left\{Y_{p q t} \log \left(\theta_{p q g h t}\right)+\left(1 - Y_{p q t}\right) \log \left(1-\theta_{p q g h t}\right)\right\} \\
+ &+ u_{p q h t} \sum_{m=1}^M \mathbb{E}_{\tilde{Q}_1} (s_{tm}) \log \Gamma\left(\alpha_{q h t m}+C'_{q h t}\right)+\text { const. } 
+ \end{aligned}
+\end{equation*}
+
+The exponential of this expression corresponds to the (unnormalized) parameter vector of a multinomial distribution $\tilde{Q}_2$:
+
+\begin{equation*}
+\begin{aligned}
+\hat \delta_{pqth} & \propto \exp \left[u_{p q h t} \sum_{g=1}^{K_{1}} \mathbb{E}_{\tilde{Q}_2} (z_{p q g t})\left\{Y_{p q t} \log \left(\theta_{p q g h t}\right)+\left(1 - Y_{p q t}\right) \log \left(1-\theta_{p q g h t}\right)\right\} \right] \\
+& \times \exp \left[ u_{p q h t} \sum_{m=1}^M \mathbb{E}_{\tilde{Q}_1} (s_{tm}) \log \Gamma\left(\alpha_{q h t m}+C'_{q h t}\right)\right]
+\end{aligned}
+\end{equation*}
+
+\subsubsection{E step 2: S}
+
+Similar to the last section, collection all terms in Equation~\ref{eq2} that contain $s_{tm}$ for a specific $t>1$ and $m$:
+
+\begin{equation*}
+    \begin{aligned}
+P(\mathbf{Y}, \mathbf{L} \mid \mathbf{B}, \boldsymbol{\beta}, \boldsymbol{\gamma})&=\Gamma\left(M \eta+U_{m}\right)^{-1} \prod_{m=1}^{M} \prod_{n=1}^{M} \Gamma\left(\eta+U_{m n}\right)  \\
+& \times \prod_{p \in V_{1t}} \left[ \frac{\Gamma\left(\xi_{ptm}\right)}{\Gamma \left( \xi_{ptm} + N_{2t} \right)}\prod_{g=1}^{K_1}\frac{ \Gamma\left( \alpha_{ptgm} + C_{ptg} \right)}{\Gamma\left(\alpha_{ptgm}\right)}  \right]^{s_{tm}} \\
+&\times \prod_{q \in V_{2t}}  \left[ \frac{\Gamma\left(\xi_{qtm}\right)}{\Gamma \left( \xi_{qtm} + N_{1t} \right)}\prod_{h=1}^{K_2}\frac{ \Gamma\left( \alpha_{qthm} + C_{qth} \right)}{\Gamma\left(\alpha_{qthm}\right)}  \right]^{s_{tm}}+\text { const. } 
+    \end{aligned}
+\end{equation*}
+
+
+Isolating terms that depend on $s_{tm} (n \neq m)$, define
+$$
+\begin{aligned} U_{m}^{\prime} &=U_{m}-s_{t m} \\ U_{m m}^{\prime} &=U_{m m}-s_{t-1, m} s_{t m}-s_{t m} s_{t+1, m} \\ U_{n m}^{\prime} &=U_{n m}-s_{t-1, n} s_{t m} \\ U_{m n}^{\prime} &=U_{m n}-s_{t m} s_{t+1, n} \end{aligned}
+$$
+So that $U'_{ab}, a, b \in \left\{m,n \right\}$ counts the number of times the hidden Markov process transitions from $a$ to $b$ except for when the transition happens into or out of time $t$. Therefore, separating the case where $m = n$ and $m \neq n$, the first two terms on the right hand side can be written as:
+
+$$
+\begin{array}{l}\Gamma\left(M \eta+s_{t m}+U_{m}^{\prime}\right)^{-1} \Gamma\left(\eta+s_{t+1, m} s_{t m}+s_{t-1, m} s_{t m}+U_{m m}^{\prime}\right) \\ \quad \times \prod_{n \neq m}^{M} \Gamma\left(\eta+s_{t+1, n} s_{t m}+U_{m n}^{\prime}\right) \Gamma\left(\eta+s_{t m} s_{t-1, n}+U_{n m}^{\prime}\right)\end{array}
+$$
+Recall that for Gamma function, $\Gamma(y+x) = y^x\Gamma(y)$, for $x \in \left\{ 0,1\right\} $, therefore this expression becomes
+
+$$
+\begin{array}{l}\left(M \eta+U_{m}^{\prime}\right)^{-s_{t m}} \Gamma\left(M \eta+U_{m}^{\prime}\right)^{-1}\left\{\left(\eta+U_{m m}^{\prime}+1\right)^{s_{t+1, m} s_{t-1, m}}\left(\eta+U_{m m}^{\prime}\right)^{s_{t-1, m}-s_{t-1, m} s_{t+1, m}+s_{t+1, m}}\right\}^{s_{t m}} \\ \quad \times \Gamma\left(\eta+U_{m m}^{\prime}\right) \prod_{n \neq m}^{M}\left(\eta+U_{m n}^{\prime}\right)^{s_{t+1, n} s_{t m}} \Gamma\left(\eta+U_{m n}^{\prime}\right) \prod_{n \neq m}^{M}\left(\eta+U_{n m}^{\prime}\right)^{s_{t m} s_{t-1, n}} \Gamma\left(\eta+U_{n m}^{\prime}\right)\end{array}
+$$
+
+\noindent To see why
+\begin{multline*}
+  \Gamma\left(\eta+s_{t+1, m} s_{t m}+s_{t-1, m} s_{t m}+U_{m m}^{\prime}\right) = \\ \left\{\left(\eta+U_{m m}^{\prime}+1\right)^{s_{t+1, m} s_{t-1, m}}\left(\eta+U_{m m}^{\prime}\right)^{s_{t-1, m}-s_{t-1, m} s_{t+1, m}+s_{t+1, m}}\right\}^{s_{t m}} \Gamma(\eta + U'_{mm}) \tag{*}
+\end{multline*}
+Recall that $s_{tm} = \mathbb{I}(s_t = m) \in \{0,1\}$, and consider in turn the following cases:
+
+\begin{enumerate}
+    \item[1)] When $s_{tm} = 0$, equation (*) simplifies to $\Gamma(\eta + U'_{mm}) = 1 \times \Gamma(\eta + U'_{mm})$, for any values of $s_{t-1,m} $and $s_{t+1,m}$
+    \item[2)] When $s_{tm} = 1$,
+    \begin{enumerate}
+        \item[i)] $s_{t-1,m} = 0$ and $s_{t+1, m} = 0$, equation (*) simplifies to: $\Gamma(\eta + U'_{mm}) = (1 \times 1)^1 \Gamma(\eta + U'_{mm})$
+        \item[ii)] $s_{t-1, m} = 1$ and $s_{t+1, m} = 0$, equation (*) becomes (recall the recursive property of the Gamma function):
+        $$\Gamma(\eta +  U'_{mm} + 1) = \left(1 \times (\eta +  U'_{mm} + 1) \right)^1\Gamma(\eta + U'_{mm})$$
+        \item[iii)] $s_{t-1, m} = 1$ and $s_{t+1, m} = 0$. This is analgous to ii)
+        \item[iv)] $s_{t-1, m} = 1$ and $s_{t+1, m} = 1$, equation (*) becomes (applying the recursive property twice):
+
+        \begin{align*}
+           \Gamma(\eta + U'_{mm} + 1 + 1) &= (\eta +  U'_{mm} + 1)\Gamma(\eta + U'_{mm} + 1)\\ 
+           &= (\eta +  U'_{mm} + 1)(\eta +  U'_{mm} )\Gamma(\eta + U'_{mm}) \\
+           &= \left[(\eta +  U'_{mm} + 1)^1(\eta +  U'_{mm} )^1\right]^1\Gamma(\eta + U'_{mm})
+        \end{align*}
+    \end{enumerate}
+\end{enumerate}
+
+
+Again focus on the terms that are specific to a $t$ and $m$,
+
+
+\begin{align*}
+&P(\mathbf{Y}, \mathbf{L} \mid \mathbf{B}, \boldsymbol{\beta}, \boldsymbol{\gamma})
+\\\quad &=\left(M \eta+U_{m}^{\prime}\right)^{-s_{t m}}\left\{\left(\eta+U_{m m}^{\prime}+1\right)^{s_{t+1, m} s_{t-1, m}}\left(\eta+U_{m m}^{\prime}\right)^{s_{t-1, m}-s_{t-1, m} s_{t+1, m}+s_{t+1, m}}\right\}^{s_{t m}} \\
+\quad &\times \prod_{n \neq m}^{M}\left(\eta+U_{m n}^{\prime}\right)^{s_{t+1, n} s_{t m}}\left(\eta+U_{n m}^{\prime}\right)^{s_{t m} s_{t-1, n}} \\ 
+& \times \prod_{p \in V_{1t}} \left[ \frac{\Gamma\left(\xi_{ptm}\right)}{\Gamma \left( \xi_{ptm} + N_{2t} \right)}\prod_{g=1}^{K_1}\frac{ \Gamma\left( \alpha_{ptgm} + C_{ptg} \right)}{\Gamma\left(\alpha_{ptgm}\right)}  \right]^{s_{tm}} \\
+&\times \prod_{q \in V_{2t}}  \left[ \frac{\Gamma\left(\xi_{qtm}\right)}{\Gamma \left( \xi_{qtm} + N_{1t} \right)}\prod_{h=1}^{K_2}\frac{ \Gamma\left( \alpha_{qthm} + C_{qth} \right)}{\Gamma\left(\alpha_{qthm}\right)}  \right]^{s_{tm}}  + \text { const. } 
+\end{align*}
+
+Taking log and expectation under $\tilde{Q}$ w.r.t. variables do not contain $s_{tm}$:
+
+\begin{equation*}
+\begin{aligned} \log \hat{\phi}_{t m} &=-s_{t m} \mathbb{E}_{\tilde{Q}_{1}}\left[\log \left(M \eta+U_{m}^{\prime}\right)\right]+s_{t m} \phi_{t+1, m} \phi_{t-1, m} \mathbb{E}_{\tilde{Q}_{1}}\left[\log \left(\eta+U_{m m}^{\prime}+1\right)\right] \\ 
+&+s_{t m}\left(\phi_{t-1, m}-\phi_{t-1, m} \phi_{t+1, m}+\phi_{t+1, m}\right) \mathbb{E}_{\tilde{Q}_{1}}\left[\log \left(\eta+U_{m m}^{\prime}\right)\right] \\ 
+&+s_{t m} \sum_{n \neq m}^{M} \phi_{t+1, n} \mathbb{E}_{\tilde{Q}_{1}}\left[\log \left(\eta+U_{m n}^{\prime}\right)\right] + s_{t m} \sum_{n \neq m}^{M} \phi_{t-1, n} \mathbb{E}_{\tilde{Q}_{1}}\left[\log \left(\eta+U_{n m}^{\prime}\right)\right] \\
+&+s_{t m} \sum_{p \in V_{1t}}\left[\frac{\Gamma\left(\xi_{p t m}\right)}{\Gamma\left(\xi_{p t m}+ N_{2t}\right)}\right] + s_{t m} \sum_{p \in V_{t1}} \sum_{g=1}^{K_1} \mathbb{E}_{\tilde{Q}_2}\left[\log \left[\frac{\Gamma\left(\alpha_{p t m g}+C_{p t g}\right)}{\Gamma\left(\alpha_{p t m g}\right)}\right]\right] \\
+&+s_{t m} \sum_{q \in V_{2t}}\left[\frac{\Gamma\left(\textcolor{blue}{\xi_{q t m}}\right)}{\Gamma\left(\textcolor{blue}{\xi_{q t m}}+ N_{1t}\right)}\right] + s_{t m} \sum_{q \in V_{t2}} \sum_{h=1}^{K_2} \mathbb{E}_{\tilde{Q}_2}\left[\log \left[\frac{\Gamma\left(\textcolor{blue}{\alpha_{q t m h}+C_{q t h}}\right)}{\Gamma\left(\textcolor{blue}{\alpha_{q t m h}}\right)}\right]\right] +\text { const } \end{aligned}
+\end{equation*}
+
+So that the $m$th element of the parameter vector for $\widetilde{Q}_1(s_t \mid \mathbf{\phi}_{tm})$ is (treating the expectations w.r.t. to $\tilde Q_2$ as constant):
+
+\begin{equation*}
+\begin{aligned} 
+\hat{\phi}_{t m} \propto & \exp \left[-\mathbb{E}_{\tilde{Q}_{1}}\left[\log \left(M \eta+U_{m}^{\prime}\right)\right]\right] \exp \left[\phi_{t+1, m} \phi_{t-1, m} \mathbb{E}_{\tilde{Q}_{1}}\left[\log \left(\eta+U_{m m}^{\prime}+1\right)\right]\right] \\ 
+& \times \exp \left[\left(\phi_{t-1, m}-\phi_{t-1, m} \phi_{t+1, m}+\phi_{t+1, m}\right) \mathbb{E}_{\tilde{Q}_{1}}\left[\log \left(\eta+U_{m m}^{\prime}\right)\right]\right] \\ 
+& \times \prod_{n \neq m} \exp \left[\phi_{t+1, n} \mathbb{E}_{\tilde{Q}_{1}}\left[\log \left(\eta+U_{m n}^{\prime}\right)\right]\right] \exp \left[\phi_{t-1, n} \mathbb{E}_{\tilde{Q}_{1}}\left[\log \left(\eta+U_{n m}^{\prime}\right)\right]\right] \\ 
+& \times \prod_{p \in V_{1t}} \left[ \frac{\Gamma\left(\xi_{ptm}\right)}{\Gamma \left( \xi_{ptm} + N_{2t} \right)}\prod_{g=1}^{K_1}\frac{ \Gamma\left( \alpha_{ptgm} + C_{ptg} \right)}{\Gamma\left(\alpha_{ptgm}\right)}  \right] \\
+&\times \prod_{q \in V_{2t}}  \left[ \frac{\Gamma\left(\xi_{qtm}\right)}{\Gamma \left( \xi_{qtm} + N_{1t} \right)}\prod_{h=1}^{K_2}\frac{ \Gamma\left( \alpha_{qthm} + C_{qth} \right)}{\Gamma\left(\alpha_{qthm}\right)}  \right]
+\end{aligned}
+\end{equation*}
+
+In the case where $t=T$, the term simplies to
+
+$$
+\begin{aligned} \hat{\phi}_{T m} & \propto \exp \left[-\mathbb{E}_{\tilde{Q}_{1}}\left[\log \left(M \eta+U_{m}^{\prime}\right)\right]\right] \prod_{n=1}^{M} \exp \left[\phi_{T-1, m} \mathbb{E}_{\tilde{Q}_{1}}\left[\log \left(\eta+U_{n m}^{\prime}\right)\right]\right] \\ 
+& \times \prod_{p \in V_{1T}} \left[ \frac{\Gamma\left(\xi_{pTm}\right)}{\Gamma \left( \xi_{pTm} + N_{2T} \right)}\prod_{g=1}^{K_1}\frac{ \Gamma\left( \alpha_{pTgm} + C_{pTg} \right)}{\Gamma\left(\alpha_{pTgm}\right)}  \right] \\
+&\times \prod_{q \in V_{2T}}  \left[ \frac{\Gamma\left(\xi_{qTm}\right)}{\Gamma \left( \xi_{qTm} + N_{1T} \right)}\prod_{h=1}^{K_2}\frac{ \Gamma\left( \alpha_{qThm} + C_{qTh} \right)}{\Gamma\left(\alpha_{qThm}\right)}  \right]
+\end{aligned}
+$$
+
+\subsubsection{M step 1: update for B}
+
+Collect the terms that contain $B_{gh}$ in Equation~\ref{eq:lb} for the lower bound expression:
+
+\begin{equation*}
+\begin{aligned} \mathcal{L}(\widetilde{Q})=& \sum_{t=1}^{T} \sum_{p, q \in V_{1t} \times V_{2t}} \sum_{g, h=1}^{K} \lambda_{p q t g} \delta_{q p t h}\left\{y_{p q t} \log \theta_{p q t g h}+\left(1-y_{p q t}\right) \log \left(1-\theta_{p q t g h}\right)\right\} \\ &-\sum_{g=1}^{K_1} \sum_{h=1}^{K_2} \frac{\left(B_{g h}-\mu_{g h}\right)^{2}}{2 \sigma_{g h}^{2}}+\text { const. } \end{aligned}
+\end{equation*}
+
+We optimize this lower bound with respect to \(\mathbf{B}_{g h}\) using a gradient-based numerical optimization method. The corresponding gradient is given by,
+$$
+\frac{\partial \mathcal{L}_{B_{g h}}}{\partial B_{g h}}=\sum_{t=1}^{T} \sum_{p, q \in V_{1t} \times V_{2t}} \lambda_{p  q t g} \delta_{q p t h}\left(y_{p q t}-\theta_{p q t g h}\right)-\frac{B_{g h}-\mu_{B_{g h}}}{\sigma_{B_{g h}}^{2}}
+$$
+\subsubsection{M step 2: $\boldsymbol{\gamma}$}
+
+Collect the terms that contain $\boldsymbol{\gamma}$ in the lower bound (note that $\theta_{pqtgh} = \mathrm{logit}^{-1} (B_{z_{pqt},u_{pqt}} + \mathbf{d}_{pq}^\top \boldsymbol{\gamma})$ is also a function of $\boldsymbol{\gamma}$), \textcolor{blue}{$J_{d}$ is the number of dyadic covariates}:
+
+\begin{equation*}
+\begin{aligned} \mathcal{L}(\tilde{Q})=& \sum_{t=1}^{T} \sum_{p, q \in V_{1t} \times V_{2t}} \sum_{g=1}^{K_1} \sum_{h=1}^{K_2} \lambda_{p q t g} \delta_{q p t h}\left\{y_{p q t} \log \theta_{p q t g h}+\left(1-y_{p q t}\right) \log \left(1-\theta_{p q t g h}\right)\right\} \\ &-\sum_{j}^{J_{d}} \frac{\left(\gamma_{j}-\mu_{\gamma}\right)^{2}}{2 \sigma_{\gamma}^{2}}+\text { const. } \end{aligned}
+\end{equation*}
+
+Similarly, we use a numerical optimization algorithm based on the following gradient to optimize this expression with respect to $\gamma_j$ (the $j$th element of the $\boldsymbol{\gamma}$ vector). The corresponding gradient is given by,
+
+
+$$
+\frac{\partial \mathcal{L}_{\gamma_j}}{\partial \gamma_j}=\sum_{t=1}^{T} \sum_{p, q \in V_{1t} \times V_{2t}} \sum_{g=1}^{K_1} \sum_{h=1}^{K_2} \lambda_{p  q t g} \delta_{q p t h} \mathbf{d}_{pqtj}^\top \left(y_{p q t}-\theta_{p q t g h}\right)- \frac{\gamma_{j}-\mu_{\gamma}}{\sigma_{\gamma}^{2}}
+$$
+
+
+\subsubsection{M step 3: $\boldsymbol{\beta_{1m}}$ and $\boldsymbol{\beta_{2m}}$}
+First, collect all terms that contain $\boldsymbol{\beta}_{1gm}$ and roll the rest of the terms into a constant. $J_{1 x}$ is the number of monadic covariates for family 1 (excluding the intercept term), and $J_{2 x}$ is the number of monadic covariates for family 2:
+
+\begin{equation*}
+\begin{aligned} \mathcal{L}(\widetilde{Q})=& \sum_{t=1}^T \sum_{m=1}^M \phi_{tm}\sum_{p \in V_{1t}}\left[\log \Gamma\left(\xi_{p t m}\right)-\log \Gamma\left(\xi_{ptm}+N_{2t}\right)\right] \\ 
+&+\sum_{t,m}\phi_{tm}\sum_{p \in V_{1t}} \sum_{g=1}^{K_{1}}\left[\mathbb{E}_{\widetilde{Q}_{2}}\left[\log \Gamma\left(\alpha_{p g t m}+C_{p t g}\right)\right]-\log \Gamma\left(\alpha_{p g t m}\right)\right] \\ 
+&-\sum_{g=1}^{K_{1}} \sum_{j=1}^{J_{1 x}} \sum_{m=1}^M \frac{\left(\beta_{1 g j m}-\mu_{\beta_{1}}\right)^{2}}{2 \sigma_{\beta_{1}}^{2}} %- \textcolor{blue}{\sum_{g=1}^{K_{1}} \sum_{m=1}^M \frac{\nu + 1}{2} \log(1 + \frac{\beta_{1\cdot 0}^2}{\nu})} 
++ \text { const. } \end{aligned}
+\end{equation*}
+
+Unlike the gradient for $\boldsymbol{\gamma}$, no closed-form solution exists for an optimum with respect to $\beta_{1mgj}$,  but a gradient-based algorithm can be implemented to maximize the above expression. The corresponding gradient with respect to each element in vector $\boldsymbol{\beta}_{1gm}$ is given by:
+
+\begin{equation*}
+\begin{aligned} 
+\frac{\partial \mathcal{L}(\tilde{Q})}{\partial \beta_{1 m g j}} &=\sum_{t=1}^{T} \phi_{t m} \sum_{p \in V_{1t}} \alpha_{p t m g} x_{1 p t j}\left(\mathbb{E}_{\tilde{Q}_{2}}\left[\breve{\psi}\left(\alpha_{p t m g}+C_{p t g}\right)-\breve{\psi}\left(\alpha_{p t g m }\right)\right]\right.\\ 
+&\left.+\left[\breve{\psi}\left(\xi_{p t m}\right)-\breve{\psi}\left(\xi_{p t m}+N_{2t}\right)\right]\right) -\frac{\beta_{1 m g j}-\mu_{\beta_{1}}}{\sigma_{\beta_{1}}^{2}} %-\textcolor{blue}{\sum_{g=1}^{K_{1}} \sum_{m=1}^M \frac{(1+\nu)\beta_{1\cdot 0}}{\nu + \beta_{1\cdot 0}^2}}
+\end{aligned}
+\end{equation*}
+
+Here, $\breve{\psi}$ is the digamma function. Similarly for $\boldsymbol{\beta_{2hm}}$, collect all the relevant terms yield:
+
+\begin{equation*}
+\begin{aligned} \mathcal{L}(\widetilde{Q})=& \sum_{t=1}^T \sum_{m=1}^M \phi_{tm}\sum_{q \in V_{2t}}\left[\log \Gamma\left(\xi_{q t m}\right)-\log \Gamma\left(\xi_{qtm}+N_{1t}\right)\right] \\ 
+&+\sum_{q \in V_{2t}} \sum_{h=1}^{K_{2}}\left[\mathbb{E}_{\widetilde{Q}_{2}}\left[\log \Gamma\left(\alpha_{q h t m}+C_{q t h}\right)\right]-\log \Gamma\left(\alpha_{q h t m}\right)\right] \\ 
+&-\sum_{h=1}^{K_{2}} \sum_{j=1}^{J_{2 x}} \sum_{m=1}^M \frac{\left(\beta_{2 h j m}-\mu_{\beta_{2}}\right)^{2}}{2 \sigma_{\beta_{2}}^{2}} + \text { const. } \end{aligned}
+\end{equation*}
+
+With the corresponding gradient:
+
+\begin{equation*}
+\begin{aligned} 
+\frac{\partial \mathcal{L}(\tilde{Q})}{\partial \beta_{2 m h j}} &=\sum_{t=1}^{T} \phi_{t m} \sum_{q \in V_{2t}} \alpha_{q t m h} x_{2 p t j} \left(\mathbb{E}_{\tilde{Q}_{2}}\left[\breve{\psi}\left(\alpha_{q t m h}+C_{q t h}\right)-\breve{\psi}\left(\alpha_{q t h m }\right)\right]\right.\\ 
+&\left.+\left[\breve{\psi}\left(\xi_{q t m}\right)-\breve{\psi}\left(\xi_{q t m}+N_{1t}\right)\right]\right) -\frac{\beta_{2 m h j}-\mu_{\beta_{2}}}{\sigma_{\beta_{2}}^{2}} 
+\end{aligned}
+\end{equation*}
+
+\subsection{Standard error computation}
+
+We obtain measures of uncertainty around regression coefficients $\boldsymbol{\beta}$ and $\boldsymbol{\gamma}$ by evaluating the curvature of the lower bound at the estimated optimal values for these hyper-parameters. When considering terms that involve these hyper-parameters, the lower bound reduces to the expected value of the log-posterior taken with respect to the variational distribution $\tilde{Q}$. Thus, evaluating the Hessian of the lower bound (and the corresponding covariance matrix of the hyper-parameters) requires evaluating that expectation. Details of the required Hessian are below.
+
+\subsubsection{Hessian for $\boldsymbol{\gamma}$}
+Restricted to terms that involve $\gamma$, we have shown that 
+$$
+\frac{\partial \mathcal{L}(\tilde{Q})}{\partial \gamma_j}=\sum_{t=1}^{T} \sum_{p, q \in V_{1t} \times V_{2t}} \sum_{g=1}^{K_1} \sum_{h=1}^{K_2} \lambda_{p  q t g} \delta_{q p t h} \mathbf{d}_{pqtj}^\top \left(y_{p q t}-\theta_{p q t g h}\right)- \frac{\gamma_{j}-\mu_{\gamma}}{\sigma_{\gamma}^{2}}
+$$
+
+Then, 
+$$
+\frac{\partial^2 \mathcal{L}(\tilde{Q})}{\partial \gamma_j \partial {\gamma_{j^{\prime}}}}= \sum_{t=1}^{T} \sum_{p, q \in V_{1t} \times V_{2t}} \sum_{g=1}^{K_1} \sum_{h=1}^{K_2} -\mathbf{d}_{pqtj}^\top \mathbf{d}_{pqtj\prime} \left[ \bar{\theta}_{p q t g h} (1-\bar{\theta}_{p q t g h}) \right] - \sigma_{\gamma}^{-2} \delta_{j j\prime}
+$$
+
+Here, $\delta_{j j\prime}$ is the Kronecker delta function, and 
+
+$$
+\bar{\theta}_{p q t g h}= \mathbb{E}_{\widetilde{Q}} \left[ \theta_{p q t g h} \right] = \hat{\lambda}_{p  q t g}^\top \hat{\mathbf{B}} \hat{\delta}_{q p t h}+ \mathbf{d}_{pqt}^\top \boldsymbol{\gamma} 
+$$
+
+is a closed-form solution to the expectation over $\widetilde{Q}$.
+
+
+\subsubsection{Hessian for $\boldsymbol{\beta_{1}}$ and $\boldsymbol{\beta_{2}}$}
+
+To derive the hessian for $\boldsymbol{\beta_{1}}$ and $\boldsymbol{\beta_{2}}$. We derive the second-order partial derivatives of the log posterior density function $f$. First, we focus on family 1 coefficients, which is $\boldsymbol{\beta_{1}}$. For coefficients in the same group $g$:
+\begin{equation*}
+\begin{aligned} 
+\frac{\partial \mathcal{L}(\tilde{Q})}{\partial \beta_{1 m g j}} &=\sum_{t=1}^{T} \phi_{t m} \sum_{p \in V_{1t}} \alpha_{p t m g} x_{1 p t j}\left(\mathbb{E}_{\tilde{Q}_{2}}\left[\breve{\psi}\left(\alpha_{p t m g}+C_{p t g}\right)-\breve{\psi}\left(\alpha_{p t g m }\right)\right]\right.\\ 
+&\left.+\left[\breve{\psi}\left(\xi_{p t m}\right)-\breve{\psi}\left(\xi_{p t m}+N_{2t}\right)\right]\right) -\frac{\beta_{1 m g j}-\mu_{\beta_{1}}}{\sigma_{\beta_{1}}^{2}}
+\end{aligned}
+\end{equation*}
+
+So, 
+\begin{equation*}
+\begin{aligned} 
+\frac{\partial^2 \mathcal{L}(\tilde{Q})}{\partial \beta_{1 m g j} \partial \beta_{1 m g j\prime}} &= \sum_{t=1}^{T} \phi_{t m} \sum_{p \in V_{1t}} x_{1 p t j} x_{1 p t j\prime} \alpha_{p t m g} \left\{\mathbb{E}_{\tilde{Q}_{2}}\left[\breve{\psi}\left(\alpha_{p t m g}+C_{p t g}\right)-\breve{\psi}\left(\alpha_{p t g m }\right)\right] \right.\\ 
+&\left.+\breve{\psi}\left(\xi_{p t m}\right)-\breve{\psi}\left(\xi_{p t m}+N_{2t}\right) \right.\\ 
+&\left.+ \alpha_{p t m g} \left[ \mathbb{E}_{\tilde{Q}_{2}}\left[\breve{\psi_{1}}\left(\alpha_{p t m g}+C_{p t g}\right)-\breve{\psi_{1}}\left(\alpha_{p t g m }\right)\right] + \breve{\psi_{1}}\left(\xi_{p t m}\right)-\breve{\psi_{1}}\left(\xi_{p t m}+N_{2t}\right) \right] \right\}
+\end{aligned}
+\end{equation*}
+
+Here, $\breve{\psi_{1}}$ is the trigamma function. For coefficients in different latent groups $g$ and $g\prime$, 
+
+$$
+\frac{\partial^2 \mathcal{L}(\tilde{Q})}{\partial \beta_{1 m g j} \partial \beta_{1 m g\prime j\prime}}= \sum_{t=1}^{T} \phi_{t m} \sum_{p \in V_{1t}} x_{1 p t j} x_{1 p t j\prime} \alpha_{p t m g} \alpha_{p t m g\prime} \left( \breve{\psi_{1}}\left(\xi_{p t m}\right)-\breve{\psi_{1}}\left(\xi_{p t m}+N_{2t}\right) \right)
+$$
+
+
+Unlike $\boldsymbol{\gamma}$, there are no closed-form solutions for the expectations involved in the Hessian for $\boldsymbol{\beta_{1}}$ and $\boldsymbol{\beta_{2}}$. To approximate them, we take $S$ samples from the Poisson-Binomial distribution of $C_{p t g}$, and we get $C_{p t g}^{(s)}$ ($s \in 1...S$), and let
+$$
+\mathbb{E}_{\tilde{Q}_{2}}\left[\breve{\psi}\left(\alpha_{p t m g}+C_{p t g}\right) \right] \approx \frac{1}{S} \sum_{S} \left( \breve{\psi}\left(\alpha_{p t m g}+C_{p t g}^{(s)}\right) \right)
+$$
+
+$$
+\mathbb{E}_{\tilde{Q}_{2}}\left[\breve{\psi}_{1}\left(\alpha_{p t m g}+C_{p t g}\right) \right] \approx \frac{1}{S} \sum_{S} \left( \breve{\psi}_{1}\left(\alpha_{p t m g}+C_{p t g}^{(s)}\right) \right)
+$$
+
+The Hessian for $\boldsymbol{\beta_{2}}$ can be derived and approximated similarly. 
+
+\subsection{Details of Stochastic Variational Inference}
+
+Like other stochastic VI (SVI) algorithms, ours follows a random gradient with expected value equal to the true gradient of the lower bound in Equation~\ref{eq:lb}. To form this unbiased gradient, and at each step of the algorithm, we use the dyad sampling scheme proposed by \cite{dulac2020mixed} to sample a mini-batch of nodes within each time period $t$, and form subgraphs $\mathbf{Y}_t^{(s)}$. The algorithm proceeds by optimizing the local variational parameters The algorithm proceeds by optimizing the local variational
+parameters (i.e. $\boldsymbol{\Lambda}$ and $\boldsymbol{\Delta}$) for all dyads $(p, q)$ in each sub-network $\mathbf{Y}_t^{(s)}$ using the updates given in the
+previous section, holding global counts constant at their most current values. We then condition on these locally updated variational parameters and obtain an intermediate value of all global counts (i.e. $\mathbf{C}$ and $\mathbf{U}$) by computing their expected value under the mini-batch sampling distribution:
+
+$$
+\widehat{C}_{pgt}=\frac{N_{2t}}{\left|V_{2t}^{(s)}\right|} \sum_{q^{\prime} \in V_{2t}^{(s)}} \sum_{h^{\prime}=1}^{K_{2}} \lambda_{p,q^{\prime}, g, h^{\prime},t} \,\, ; \,\, \widehat{C}_{qht}=\frac{N_{1t}}{\left|V_{1t}^{(s)}\right|} \sum_{p^{\prime} \in V_{1t}^{(s)}} \sum_{g^{\prime}=1}^{K_{1}} \delta_{p^{\prime}, q, g^{\prime}, h, t} \,\, ;  \,\,\widehat{U}_{m n}=\sum_{t=2}^{T} \kappa_{t-1, m} \kappa_{t, n}
+$$
+
+
+We finalize each step by updating these global counts using a weighted average:
+$$
+\mathbf{C}_{pt}^{(s)}=\left(1-\rho_{p, s}\right) \mathbf{C}_{pt}^{(s-1)}+\rho_{p, s} \widehat{\mathbf{C}}_{pt} \,\, ; \,\, \mathbf{C}_{qt}^{(s)}=\left(1-\rho_{q, s}\right) \mathbf{C}_{qt}^{(s-1)}+\rho_{q, s} \widehat{\mathbf{C}}_{qt} \,\,; \,\, \mathbf{U}^{(s)}=\left(1-\rho_{s}\right) \mathbf{U}^{(s-1)}+\rho_{s} \widehat{\mathbf{U}}
+$$
+
+
+where we set the step-size $\rho_s$ = $(\tau + s)^{-p}$, and $p \in (0.5, 1.0]$, $\tau \geq 0$ are researcher-set arguments controlling the extent to which previous iterations affect current values of the sufficient statistics \citep{cappe2009line, hoffman2013stochastic}. To set the values
+of our hyperparameters we once again follow an empirical Bayes approach, updating the hyper-parameters along with the global sufficient statistics by taking a step in the direction of the gradient of the stochastic lower bound. As an example, for $\boldsymbol{\gamma}$, we have: 
+
+$$
+\gamma^{(s)}=\gamma^{(s-1)}+\rho_{s} \nabla_{\gamma} \mathcal{L}_{\hat{\phi}, \hat{\lambda}, \hat{\delta}}^{(s)}(\gamma)
+$$
+where the gradient is given in Section~\ref{appendix:em}. The updates
+for all other hyper-parameters are similarly defined.
+
+\subsection{Initial values for parameters and label realignment}
+To ensure consistent labeling of groups across time, we implement an initialization and label realignment algorithm as follows.
+
+Let $N = \{N^{(1)}, \dots, N^{(T)}\}$ denote the set of observed bipartite networks over $T$ periods. For each period $t$, we first estimate a static bipartite MMSBM model. This yields estimated block structures $B^{(t)}$ and corresponding mixed-membership vectors $\mathbf{z}^{m(t)}$ and $\mathbf{u}^{m(t)}$ for the two node sets.
+
+Because group labels are not identified consistently across periods, we apply a realignment procedure to match labels over time. For each $t \geq 2$, we consider all possible permutations of the rows and columns of $B^{(t)}$ to form the set of transformed block matrices $\{B'^{(t)}\}$. For each transformation, we compute the Frobenius norm between $B'^{(t)}$ and the baseline structure $B^{(1)}$ in period 1:
+
+\[
+d^{(t)} = \|B^{(t)} - B^{(1)}\|_{F}, \quad 
+d'^{(t)} = \|B'^{(t)} - B^{(1)}\|_{F}.
+\]
+
+The transformation that minimizes the Frobenius norm is selected. The corresponding label permutation is then applied to the membership vectors $\mathbf{z}^{m(t)}$ and $\mathbf{u}^{m(t)}$. If the original (untransformed) matrix $B^{(t)}$ yields the smallest distance, the labels are left unchanged. The resulting aligned memberships are denoted $\mathbf{z}^{*(t)}$ and $\mathbf{u}^{*(t)}$.
+
+Finally, the realigned mixed-membership vectors across all periods are used as initialization inputs in the dynamic estimation stage. This initialization and realignment method ensures that group labels remain consistent across time, enabling meaningful interpretation of block structures and mixed-membership.
+
+\FloatBarrier    
+\section{Simulation}
+\renewcommand{\thetable}{C\arabic{table}}
+\renewcommand{\thefigure}{C\arabic{figure}}
+\setcounter{figure}{0}
+\setcounter{table}{0}
+\renewcommand\theHtable{Appendix.\thetable}
+\renewcommand\theHfigure{Appendix.\thefigure}
+\subsection{Simulation setup}
+We evaluate the performance of our proposed model on synthetic dynamic bipartite networks over 50 periods with 100 nodes per family. The latent-state process assigns periods 1–25 to state 1 and 26–50 to state 2. Each family has one monadic covariate drawn from $0.5\mathcal{N}(-1.25, 0.09) + 0.5\mathcal{N}(1.25, 0.09)$, and one dyadic covariate: $d_{pqt} = d_{pq,1} + \epsilon_{dt}$, where $\epsilon_{dt} \sim \mathcal{N}(0,1)$.
+
+We vary difficulty across \emph{Easy, Medium, Hard} designs by increasing similarity in $\mathbf{B}$ entries and in membership distributions:
+
+\begin{table}[h!]
+\centering
+\[
+\begin{array}{c|c|c|c}
+    & \textbf{Easy} & \textbf{Medium} & \textbf{Hard} \\
+    \hline
+    \text{logit}^{-1}(\mathbf{B}) & 
+    \begin{bmatrix} 0.90 & 0.01 \\ 0.10 & 0.60 \end{bmatrix} & 
+    \begin{bmatrix} 0.90 & 0.05 \\ 0.25 & 0.60 \end{bmatrix} & 
+    \begin{bmatrix} 0.90 & 0.10 \\ 0.40 & 0.60 \end{bmatrix} \\[2ex]
+    \beta_1 & 
+    \begin{bmatrix} 1.50 & -0.50 \\ 1.25 & -1.50 \end{bmatrix} & 
+    \begin{bmatrix} 1.00 & -0.25 \\ 0.75 & -1.00 \end{bmatrix} & 
+    \begin{bmatrix} 0.60 & -0.05 \\ 0.50 & -0.55 \end{bmatrix} \\[2ex]
+    \beta_2 & 
+    \begin{bmatrix} -3.00 & 1.00 \\ 7.25 & -4.25 \end{bmatrix} & 
+    \begin{bmatrix} -0.50 & 0.25 \\ 1.25 & -1.25 \end{bmatrix} & 
+    \begin{bmatrix} -1.05 & -0.55 \\ 1.55 & -0.25 \end{bmatrix} \\
+\end{array}
+\]
+\caption{ Parameter settings for Easy, Medium, and Hard data-generating processes.}\label{sim_para}
+\end{table}
+
+\begin{figure}[h!]
+\centering
+\scriptsize
+\begin{tabular}{cc}
+% --- Easy case ---
+\includegraphics[width=0.25\linewidth]{simulation/easy/dens_state1.pdf} &
+\includegraphics[width=0.25\linewidth]{simulation/easy/dens_state2.pdf} \\[-2pt]
+Easy: State 1 & Easy: State 2 \\[6pt]
+% --- Medium case ---
+\includegraphics[width=0.25\linewidth]{simulation/dens_state1.pdf} &
+\includegraphics[width=0.25\linewidth]{simulation/dens_state2.pdf} \\[-2pt]
+Medium: State 1 & Medium: State 2 \\[6pt]
+% --- Hard case ---
+\includegraphics[width=0.25\linewidth]{simulation/hard/dens_state1.pdf} &
+\includegraphics[width=0.25\linewidth]{simulation/hard/dens_state2.pdf} \\[-2pt]
+Hard: State 1 & Hard: State 2
+\end{tabular}
+
+\caption{\small \textbf{Simulated Mixed-Membership Distributions:} Density plots of simulated mixed-memberships in Group 1 across three data-generating processes (DGPs): Easy, Medium, and Hard. The left and right columns correspond to latent states 1 and 2, respectively. }
+\label{sim_dens}
+\end{figure}
+
+
+
+\FloatBarrier
+\subsection{Simulation Results}
+We begin by evaluating the accuracy of mixed-membership estimation by comparing true and
+estimated mixed-membership vectors, as well as true and estimated blockmodel structures. Correlations across node types and difficulty scenarios are demonstrated
+in Figure~\ref{sim_mm_all}. Overall, our model retrieves these mixed-membership vectors and blockmodels with a high degree of accuracy
+--even in regimes in which membership is highly mixed, and when the tie-formation patterns in different latent groups are relatively similar. 
+
+\begin{figure}[h!]
+\centering
+% Easy
+\subfloat[Easy case]{%
+\includegraphics[width=0.28\linewidth]{simulation/easy/mod_S_all.pdf}
+\includegraphics[width=0.28\linewidth]{simulation/easy/mod_B_all.pdf}
+\includegraphics[width=0.28\linewidth]{simulation/easy/bm.pdf}
+\label{sim_mm_easy}
+} \\[6pt]
+% Medium
+\subfloat[Medium case]{%
+\includegraphics[width=0.28\linewidth]{simulation/mod_S_all.pdf}
+\includegraphics[width=0.28\linewidth]{simulation/mod_B_all.pdf}
+\includegraphics[width=0.28\linewidth]{simulation/bm.pdf}
+\label{sim_mm_medium}
+} \\[6pt]
+% Hard
+\subfloat[Hard case]{%
+\includegraphics[width=0.28\linewidth]{simulation/hard/mod_S_all.pdf}
+\includegraphics[width=0.28\linewidth]{simulation/hard/mod_B_all.pdf}
+\includegraphics[width=0.28\linewidth]{simulation/hard/bm.pdf}
+\label{sim_mm_hard}
+}
+
+\caption{\small \textbf{Mixed-Membership Recovery}: Estimated mixed-membership vectors for family 1 (left), family 2 (middle), and the recovered blockmodel $\mathbf{B}$ (right) across three difficulty settings: (a) Easy, (b) Medium, and (c) Hard. White numbers indicate true values.}
+\label{sim_mm_all}
+\end{figure}
+
+
+Next, we evaluate the accuracy of the estimated node-level and dyadic coefficients. Figure~\ref{sim_coef_all} plots the predicted membership using estimated monadic coefficients against that predicted by true monadic coefficients. The figure also plots the standard error coverage across simulations against the empirical standard deviation of the coefficients. Across all difficulty levels, the DB-MMSBM predicts memberships using estimated monadic coefficients with high fidelity to the true coefficients, and produces standard errors consistent with empirical variability. We also show how well we can recover the true mixed membership, using the estimated coefficients. Figure~\ref{sim_monad_pred_all} shows that although predicting true mixed membership is difficult, the estimated monadic coefficients perform comparably well compared to using true coefficients. 
+
+Figure~\ref{sim_dyad_all} plots the estimated dyadic coefficients against the true dyadic coefficient, as well as the standard error coverage against the empirical standard deviation of the dyadic coefficient. The DB-MMSBM recovers dyadic coefficients accurately across different difficulty levels, although it tends to slightly over estimate the uncertainty of dyadic coefficients.
+
+Finally, we also assess when the model is likely to fail. When the blockmodel $\mathbf{B}$ provides little information, that is when entries in the $\mathbf{B}$ matrix becomes increasingly similar, the model will struggle to distinguish between latent groups. Based on the current \textit{Hard} case, we further make entries in $\mathbf{B}$ more similar: from 
+$\small\begin{bmatrix} 0.9 & 0.1 \\ 0.4 & 0.6 \end{bmatrix}$ 
+to 
+$\small\begin{bmatrix} 0.9 & 0.4 \\ 0.5 & 0.6 \end{bmatrix}$. Figure~\ref{sim_hardest} plots the resulting mixed membership recovery. The model now cannot recover mixed membership accurately. Plotting each time period separately shows that the model is suffering from label-switching because different elements in $\mathbf{B}$ are too similar.
+
+%Across all difficulty levels, the DB-MMSBM recovers mixed-membership vectors and blockmodel structures accurately, predicts memberships using estimated coefficients $\hat{\beta}$ with high fidelity to the true coefficients, and produces standard errors consistent with empirical variability. Figures~\ref{sim_mm} and Figure~\ref{sim_coef} show the simulation results for the medium case.
+
+
+
+\begin{figure}[h!]
+\centering
+% --- Easy case ---
+\subfloat[Easy case]{%
+\includegraphics[width=0.28\linewidth]{simulation/easy/pred_prob_all.pdf}
+\includegraphics[width=0.28\linewidth]{simulation/easy/hess_S.pdf}
+\includegraphics[width=0.28\linewidth]{simulation/easy/hess_B.pdf}
+\label{sim_coef_easy}
+} \\[6pt]
+% --- Medium case ---
+\subfloat[Medium case]{%
+\includegraphics[width=0.28\linewidth]{simulation/pred_prob_all.pdf}
+\includegraphics[width=0.28\linewidth]{simulation/hess_S.pdf}
+\includegraphics[width=0.28\linewidth]{simulation/hess_B.pdf}
+\label{sim_coef_medium}
+} \\[6pt]
+% --- Hard case ---
+\subfloat[Hard case]{%
+\includegraphics[width=0.28\linewidth]{simulation/hard/pred_prob_all.pdf}
+\includegraphics[width=0.28\linewidth]{simulation/hard/hess_S.pdf}
+\includegraphics[width=0.28\linewidth]{simulation/hard/hess_B.pdf}
+\label{sim_coef_hard}
+}
+
+\caption{\small \textbf{Monadic Coefficient Recovery}: Model performance across three difficulty settings: (a) Easy, (b) Medium, and (c) Hard. Each row displays (left) predicted mixed-membership using $\hat{\boldsymbol{\beta}}$ vs.\ true $\boldsymbol{\beta}$, (middle) standard error coverage for family 1, and (right) coverage for family 2. Red crosses mark empirical standard deviations across simulations.}
+\label{sim_coef_all}
+\end{figure}
+
+
+\begin{figure}[h!]
+\centering
+% --- Easy case ---
+\subfloat[Easy case]{%
+\includegraphics[width=0.4\linewidth]{simulation/easy/truebeta_truemm.pdf}
+\includegraphics[width=0.4\linewidth]{simulation/easy/estbeta_truemm.pdf}
+
+} \\[6pt]
+% --- Medium case ---
+\subfloat[Medium case]{%
+\includegraphics[width=0.4\linewidth]{simulation/truebeta_truemm.pdf}
+\includegraphics[width=0.4\linewidth]{simulation/estbeta_truemm.pdf}
+
+} \\[6pt]
+% --- Hard case ---
+\subfloat[Hard case]{%
+\includegraphics[width=0.4\linewidth]{simulation/hard/truebeta_truemm.pdf}
+\includegraphics[width=0.4\linewidth]{simulation/hard/estbeta_truemm.pdf}
+
+}
+
+\caption{\small \textbf{Monadic Coefficient Predicted Membership and True Membership}: Model performance across three difficulty settings: (a) Easy, (b) Medium, and (c) Hard. Each row displays (left) predicted mixed-membership using true ${\boldsymbol{\beta}}$ vs. true mixed membership, and (right) predicted mixed-membership using estimated ${\hat{\boldsymbol{\beta}}}$ vs. true mixed membership}
+\label{sim_monad_pred_all}
+\end{figure}
+
+\begin{figure}[h!]
+\centering
+% --- Easy case ---
+\subfloat[Easy case]{%
+\includegraphics[width=0.25\linewidth]{simulation/easy/dyad_coef.pdf}
+\includegraphics[width=0.25\linewidth]{simulation/easy/dyad_se.pdf}
+\label{dyad_easy}
+} \\[6pt]
+% --- Medium case ---
+\subfloat[Medium case]{%
+\includegraphics[width=0.25\linewidth]{simulation/dyad_coef.pdf}
+\includegraphics[width=0.25\linewidth]{simulation/dyad_se.pdf}
+\label{dyad_medium}
+} \\[6pt]
+% --- Hard case ---
+\subfloat[Hard case]{%
+\includegraphics[width=0.25\linewidth]{simulation/hard/dyad_coef.pdf}
+\includegraphics[width=0.25\linewidth]{simulation/hard/dyad_se.pdf}
+\label{dyad_hard}
+}
+
+\caption{\small \textbf{Dyadic Coefficient Recovery}: Model performance across three difficulty settings: (a) Easy, (b) Medium, and (c) Hard. Each row displays (left) estimated coefficients $\hat{\boldsymbol{\gamma}}$ vs.\ true ${\boldsymbol{\gamma}}$, and (right) corresponding standard error coverage. Red crosses mark empirical standard deviations across simulations.}
+\label{sim_dyad_all}
+\end{figure}
+
+
+
+
+\begin{figure}[!h]
+  \begin{center}
+  \begin{tabular}{cc}
+    \includegraphics[width=0.4\linewidth]
+  {simulation/hardest/mod_B_all.pdf}&
+          \includegraphics[width=0.4\linewidth]
+    {simulation/hardest/mod_B_year.pdf}\\ 
+%  (a) Financial   & (b) EU \\
+      \includegraphics[width=0.4\linewidth]
+  {simulation/hardest/mod_S_all.pdf}&
+          \includegraphics[width=0.4\linewidth]
+    {simulation/hardest/mod_S_year.pdf}\\ 
+%  (c) AU  & (d) ASEAN \\
+  \end{tabular}  \end{center}
+  \caption{\small \textbf{Mixed-Membership Recovery under Weak Information from $\mathbf{B}$ .}
+The first row corresponds to family 1 and the second to family 2.
+Left panels compare estimated mixed-membership vectors with true values, and right panels show results by time period.} \label{sim_hardest}
+\end{figure}
+
+
+\end{document}

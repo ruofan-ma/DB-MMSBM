@@ -1,0 +1,632 @@
+\documentclass[handout]{beamer}
+%Information to be included in the title page:
+\usetheme{Madrid}
+\usecolortheme{beaver} 
+\usepackage{multicol}
+\usepackage{amssymb}
+\usepackage{amsfonts}
+\usepackage{tabularx}
+\usepackage{graphicx}
+\usepackage{subcaption}
+\usepackage{appendixnumberbeamer}
+\usepackage{booktabs}
+\usepackage{siunitx}
+\usepackage{algpseudocode}
+\usepackage{algorithm}
+\usepackage{amsmath}
+\usepackage{fancyvrb}
+\usepackage{soul}
+\usepackage{bbding}
+
+\useoutertheme[subsection=false]{miniframes}
+%\mode<presentation> {
+  \makeatletter
+    \let\beamer@writeslidentry@miniframeson=\beamer@writeslidentry
+    \def\beamer@writeslidentry@miniframesoff{%
+      \expandafter\beamer@ifempty\expandafter{\beamer@framestartpage}{}% does not happen normally
+      {%else
+        % removed \addtocontents commands
+        \clearpage\beamer@notesactions%
+      }
+    }
+    \newcommand*{\miniframeson}{\let\beamer@writeslidentry=\beamer@writeslidentry@miniframeson}
+    \newcommand*{\miniframesoff}{\let\beamer@writeslidentry=\beamer@writeslidentry@miniframesoff}
+    \beamer@compresstrue
+    \makeatother
+
+\definecolor{crimson}{rgb}{0.6,0,0}
+
+\title[Dynamic Bipartite MMSBM]{Dynamic Bipartite Stochastic Blockmodel Regression for Network Data \\
+\large{Application to State and Intergovernmental Organization Networks}}
+\author[Q. Liu, R. Ma, S. Olivella, K. Imai]{Qi Liu  \inst{1} \and Ruofan Ma \inst{1} \and Santiago Olivella \inst{3} \and Kosuke Imai \inst{1,2}}
+
+\institute[shortinst]{\inst{1} \textit{Department of Government, Harvard University} \samelineand \inst{2} \textit{Department of Statistics, Harvard University} \samelineand \inst{3} \textit{Department of Political Science, UNC at Chapel Hill}}
+\date{August 14, 2025}
+
+
+
+\makeatletter
+\setbeamertemplate{footline}
+{
+  \leavevmode%
+  \hbox{%
+  \begin{beamercolorbox}[wd=.333333\paperwidth,ht=2.25ex,dp=1ex,center]{author in head/foot}%
+    \usebeamerfont{author in head/foot}\insertshortauthor%~~\beamer@ifempty{\insertshortinstitute}{}{(\insertshortinstitute)}
+  \end{beamercolorbox}%
+  \begin{beamercolorbox}[wd=.333333\paperwidth,ht=2.25ex,dp=1ex,center]{title in head/foot}%
+    \usebeamerfont{title in head/foot}\insertshorttitle
+  \end{beamercolorbox}%
+  \begin{beamercolorbox}[wd=.333333\paperwidth,ht=2.25ex,dp=1ex,right]{date in head/foot}%
+    \usebeamerfont{date in head/foot}\insertshortdate{}\hspace*{2em}
+    \insertframenumber{} / \inserttotalframenumber\hspace*{2ex} 
+  \end{beamercolorbox}}%
+  \vskip0pt%
+}
+\makeatother
+
+\newcommand{\pb}[1]{\mathbb{P}\left(#1\right)}
+\newcommand{\ex}[1]{\mathbb{E}\left[#1\right]}
+\newcommand{\var}[1]{\mathbb{V}\left[#1\right]}
+\newcommand{\cov}[1]{\mathrm{Cov}\left[#1\right]}
+\newcommand{\corr}[1]{\mathrm{Corr}\left[#1\right]}
+\newcommand{\indep}{\rotatebox[origin=c]{90}{$\models$}}
+
+\usepackage{amsmath}
+\useoutertheme[subsection=false]{miniframes}
+
+\begin{document}
+
+\frame{\titlepage}
+
+\begin{frame}{Overview}
+
+        \begin{itemize}
+
+
+\vspace{2mm}
+        \item Motivation \vspace{3mm}
+       \item Model Setup \vspace{3mm}
+       \item Simulation \vspace{3mm}
+       \item Application: State and Intergovernmental Organization Networks
+  
+         \end{itemize}
+
+
+
+\end{frame}
+
+\section{Motivation}
+\begin{frame}{Dynamic Bipartite Networks in Political Science}
+
+    \begin{itemize}[<+->]
+ \item Most Political networks are
+ \begin{itemize}
+     \item \textbf{Dynamic} — ties evolve over time
+     \item \textbf{Bipartite} — two node types, ties only across types\\(e.g., states–treaties, legislatures–bills, lobbyists-politicians)
+
+ \end{itemize} \vspace{3mm}
+ \item \textbf{Problem}:  Use static/ projected unipartite models $\rightsquigarrow$ bias and spurious clustering \begin{scriptsize}  \textcolor{gray}{ (Lo et al., 2025) } \end{scriptsize}  \vspace{3mm}
+ \item \textbf{Our contribution: \textcolor{crimson}{ Dynamic Bipartite MMSBM}}
+    \end{itemize}
+\end{frame}
+\begin{frame}{Dynamic Bipartite Networks in Political Science}
+
+    \begin{itemize}
+        \item Coverage: 2010-2024; APSR, AJPS, JOP, PA
+      %  \item 60+ papers explicitly use network analysis methods or discuss the data structure as a network. We then exclude the paper from our overview if
+     %   \begin{itemize}
+     %       \item The data do not have a bipartite-dynamic structure
+       %     \item The data technically span overtime, but the author(s) only collected a snapshot
+      %  \end{itemize}
+      %  \item 32 papers use data that have a underlying bipartite-dynamic structure, among which
+     %   \begin{itemize}
+     %       \item 1/32 address the bipartite structure; 30/32 projected the network to unipartite
+        %    \item 13/32 collapsed the data into one network; 12/32 break the data into a series of cross-sectionals; 2/32 do both (collapse into several cross-sectionals); 5/32 address the dynamic structure of network
+      %  \end{itemize}
+    \end{itemize}
+     \begin{figure}
+        \centering
+        \includegraphics[width=0.75\linewidth]{application/lit.png}
+
+    \end{figure}
+\end{frame}
+
+\section{Model Setup}
+
+%\begin{frame}{Data Generating Process}
+%  \begin{enumerate}[<+->]
+%        \item  For each time period $t>1$, draw a historical state $S_{t} \mid S_{t-1}=$ $n \sim$ Categorical $\left(\mathbf{A}_{n}\right)$.
+%        \item For each node $p \in V_1$ and $q \in V_2$ at time $t$, given $S_t = m$, draw state-dependent mixed-membership vectors:
+%        \scriptsize \[
+%        \pi_{pt} \sim \text{Dirichlet}\left( \left\{ \exp\left( \mathbf{x}_{pt}^\top \boldsymbol{\beta}_{1gm} \right) \right\}_{g=1}^{K_1} \right),  \quad
+%        \psi_{qt} \sim \text{Dirichlet}\left( \left\{ \exp\left( \mathbf{x}_{qt}^\top \boldsymbol{\beta}_{2hm} \right) \right\}_{h=1}^{K_2} \right)
+%        \]
+%\normalsize \item  For each pair of nodes $(p,q)$ at time $t$: \\
+%\begin{itemize}
+%    \item Sample group indicators: $z_{pq,t} \sim \text{Categorical}(\pi_{pt}), \quad u_{pq,t} \sim \text{Categorical}(\psi_{qt})$.\\
+%    \item Sample a link between them: \\
+%$Y_{p q t} \sim$ Bernoulli $\left(\text{logit}^{-1}\left(B_{z_{pq,t}, u_{pq,t}}+\mathbf{d}_{p q t}^{\top} \boldsymbol{\gamma}\right)\right) .$
+%\end{itemize}
+%      \end{enumerate}
+%\end{frame}
+
+\begin{frame}{Plate Diagram of the DGP}
+% \begin{itemize} {\scriptsize
+ %\item \textbf{Dynamic bipartite graph $G_t = (V_{1,t}, V_{2,t}, Y_t)$}
+    %\begin{itemize} {\scriptsize
+   % \item Nodes $p \in V_{1,t}$ and $q \in V_{2,t}$. $Y_{pqt} = 1$ if an edge from $p$ to $q$ exists at time $t$, $Y_{pqt} = 0$ otherwise
+  %      \item $s_t$: latent state; $\mathrm{A}$: transition matrix
+  %  \item For each node pair $(p, q)$, where $p \in V_{1,t}$ and $q \in V_{2,t}$, let $z_{pqt} \in \{1, \dots, K_1\}$ be the latent group assignment of node $p$ when interacting with $q$, and $u_{pqt} \in \{1, \dots, K_2\}$ be the latent group of node $q$. Let $y_{pqt} = 1$ if an edge from $p$ to $q$ exists at time $t$, and $y_{pqt} = 0$ otherwise. Mixed-membership vectors are drawn from Markov-dependent Dirichlet distributions with concentration parameters based on node covariates.
+% \item $\pi_{pt}$, $\psi_{qt}$: mixed membership; $z_{pq,t}$, $u_{pq,t}$: $(p,q)$ interaction specific group indicators
+   % \item The model is completed with a $K_1 \times K_2$ block matrix $\mathbf{B}$, where each entry $B_{gh}$ represents the log-odds of an edge forming between latent groups $g$ and $h$. This defines the data-generating process:
+  % \item  $\mathbf{B}$: $K_1 \times K_2$ block matrix. $B_{gh}$: log-odds of an edge forming between groups $g$ and $h$
+ %  \item $\mathbf{x}_{pt}$, $\mathbf{x}_{qt}$: monadic covariates (coefficient: $\boldsymbol{\beta}_{1gm}$, $\boldsymbol{\beta}_{2hm}$); $\mathbf{d}_{p q t}$: dyadic covariates (coefficient: $\boldsymbol{\gamma}$)}
+ %  \item  $Y_{pqt} = 1$ if an edge from $p$ to $q$ exists at time $t$, $Y_{pqt} = 0$ otherwise
+  %  \end{itemize}}
+%\end{itemize} %\vspace{-1cm}
+     \begin{figure}[h]
+  \centering
+  \includegraphics[width=0.9\textwidth]{DAG_horizontal.pdf}
+\end{figure}
+\end{frame}
+
+\begin{frame}{Estimation Details}
+    \begin{itemize}[<+->]
+    \item Quantities of Interest:
+    \begin{itemize}
+        \item latent memberships ($\boldsymbol{\pi}$, $\boldsymbol{\psi}$);
+        \item monadic and dyadic coefficients ($\boldsymbol{\beta}_1$, $\boldsymbol{\beta}_2$, $\boldsymbol{\gamma}$) and blockmodel ($\boldsymbol{B}$)
+    \end{itemize}
+        \item Mean-field variational EM for posterior inference
+        \item Stochastic VI algorithm to speed up computation
+        \item Use the static version of the model to obtain starting values
+    \end{itemize}
+\end{frame}
+
+
+\section{Simulation}
+\begin{frame}{Simulation Setup}
+\textbf{Dynamic bipartite networks over 50 periods, 100 nodes per family:}
+%\vspace{-0.3cm}
+\begin{itemize}[<+->]
+  \item \textbf{Latent states (HMM):} Periods 1–25 in state 1; 26–50 in state 2
+  \item \textbf{Covariates:} 
+  \begin{itemize}
+    \item 1 monadic covariate per family: $x_{pt}, x_{qt} \sim 0.5 \cdot \mathcal{N}(-1.25, 0.09) + 0.5 \cdot \mathcal{N}(1.25, 0.09)$
+    \item 1 dyadic covariate: $\mathbf{d}_{pqt} = \mathbf{d}_{pq,t-1} + \epsilon_{dt}$, where $\epsilon_{dt} \sim \mathcal{N}(0,1)$, $\mathbf{d}_{pq,1} \sim \mathcal{N}(0,4)$, $\gamma=0.1$
+  \end{itemize}
+  \item \textbf{Difficulty levels:} \textit{Easy, Medium, Hard} — vary $\mathbf{B}$ and $\boldsymbol{\beta}$ 
+  \item \textcolor{crimson}{\textbf{Model recovers:}}
+  \begin{itemize}
+    \item \textcolor{crimson}{\textbf{Mixed-membership vectors, group structure, regression parameters}}
+    \item \textcolor{crimson}{\textbf{Good performance across difficulty levels}}
+  \end{itemize}
+\end{itemize}
+    
+\end{frame}
+
+\begin{frame}{Simulation Setup}
+\begin{table}[ht]
+\centering
+\label{tab:parameter_matrices}
+\[
+\begin{array}{c|c|c|c}
+    & \textbf{Easy} & \textbf{Medium} & \textbf{Hard} \\
+    \hline
+    \text{logit}^{-1}(\mathbf{B}) & 
+    \begin{bmatrix} 0.90 & 0.01 \\ 0.10 & 0.60 \end{bmatrix} & 
+    \begin{bmatrix} 0.90 & 0.05 \\ 0.25 & 0.60 \end{bmatrix} & 
+    \begin{bmatrix} 0.90 & 0.10 \\ 0.40 & 0.60 \end{bmatrix} \\[2ex]
+    \beta_1 & 
+    \begin{bmatrix} 1.50 & -0.50 \\ 1.25 & -1.50 \end{bmatrix} & 
+    \begin{bmatrix} 1.00 & -0.25 \\ 0.75 & -1.00 \end{bmatrix} & 
+    \begin{bmatrix} 0.60 & -0.05 \\ 0.50 & -0.55 \end{bmatrix} \\[2ex]
+    \beta_2 & 
+    \begin{bmatrix} -3.00 & 1.00 \\ 7.25 & -4.25 \end{bmatrix} & 
+    \begin{bmatrix} -0.50 & 0.25 \\ 1.25 & -1.25 \end{bmatrix} & 
+    \begin{bmatrix} -1.05 & -0.55 \\ 1.55 & -0.25 \end{bmatrix} \\
+\end{array}
+\]
+\caption*{\normalsize Easy, medium, to hard DGPs}
+%{\footnotesize Note: Columns: increasing complexity. Rows: blockmodels ($\mathbf{B}$) and regression coefficient vectors ($\boldsymbol{\beta}$) by HMM state. \\Easy to hard: more similar entries in $\mathbf{B}$ and more mixed memberships.}
+\end{table}
+    
+\end{frame}
+
+
+\begin{frame}{Simulation Setup}
+%\textbf{Medium Case (Mixed Membership and Blockmodel):}
+
+\begin{figure} \scriptsize
+                \begin{center}
+               \begin{figure}[!h]
+  \begin{tabular}{cc}
+    \includegraphics[width=0.22\linewidth]
+  {simulation/easy/dens_state1.pdf}&
+          \includegraphics[width=0.22\linewidth]
+  {simulation/easy/dens_state2.pdf}\\ 
+ \scriptsize{ Easy: state 1} & \scriptsize{ Easy: state 2}  \\
+  \includegraphics[width=0.22\linewidth]
+  {simulation/dens_state1.pdf}&
+          \includegraphics[width=0.22\linewidth]
+  {simulation/dens_state2.pdf}\\ 
+    \scriptsize{ Medium: state 1} & \scriptsize{ Medium: state 2}  \\
+  \includegraphics[width=0.22\linewidth]
+  {simulation/hard/dens_state1.pdf}&
+          \includegraphics[width=0.22\linewidth]
+  {simulation/hard/dens_state2.pdf}\\ 
+   \scriptsize{ Hard: state 1} & \scriptsize{ Hard: state 2}  \\
+  \end{tabular}
+  \caption{Simulated Membership in Group 1}
+\end{figure}
+                  \end{center}
+                 % \caption*{\normalsize a) and b): estimated mixed-membership vectors align with known values; \\
+            %      c): estimated blockmodel match known values (white numbers)} \label{mm_B}
+                %  Note: a) and b): estimated mixed-membership vectors by time periods against known values. \\ c): estimated blockmodel against known values (indicated by the white numbers in each cell).  \label{mm_B}
+            \end{figure} \vspace{-0.2cm}
+    \begin{itemize}
+        \item \footnotesize Easy, medium, to hard DGPs: more similar entries in $\mathbf{B}$ and more mixed memberships
+       % \item %c): estimated blockmodel match known values (white numbers)
+    \end{itemize}
+      %  \hyperlink{easy}{\beamerbutton{easy}} \hyperlink{hard}{\beamerbutton{hard}}
+\end{frame}
+
+\begin{frame}
+  \frametitle{\textrm{ Simulation Results}}
+\textbf{Easy Case (Mixed Membership and Blockmodel):}
+
+\begin{figure} \scriptsize
+                \begin{center}
+                \begin{tabular}{ccc}
+                 \includegraphics[width=0.25\linewidth]{simulation/easy/mod_S_all.pdf}&
+                 \includegraphics[width=0.25\linewidth]{simulation/easy/mod_B_all.pdf}&
+                 \includegraphics[width=0.25\linewidth]{simulation/easy/bm.pdf}\\
+              a) Mixed-membership (family 1) & b) Mixed-membership (family 2) & c) Blockmodel  \\
+                  \end{tabular}
+                  \end{center}
+                 % \caption*{\normalsize a) and b): estimated mixed-membership vectors align with known values; \\
+            %      c): estimated blockmodel match known values (white numbers)} \label{mm_B}
+                %  Note: a) and b): estimated mixed-membership vectors by time periods against known values. \\ c): estimated blockmodel against known values (indicated by the white numbers in each cell).  \label{mm_B}
+            \end{figure}
+    \begin{itemize}
+        \item a) and b): estimated mixed-membership vectors align with known values
+        \item c): estimated blockmodel match known values (white numbers)
+    \end{itemize}
+\end{frame}
+
+
+
+\begin{frame}
+  \frametitle{\textrm{ Simulation Results}}
+\textbf{Easy Case (Coefficients):}
+
+ \begin{figure} \scriptsize
+                \begin{center}
+                \begin{tabular}{ccc}
+                 \includegraphics[width=0.25\linewidth]{simulation/easy/pred_prob_all.pdf}&
+                 \includegraphics[width=0.25\linewidth]{simulation/easy/hess_S.pdf}&
+                 \includegraphics[width=0.25\linewidth]{simulation/easy/hess_B.pdf}\\
+              a) Mixed-membership prediction with $\hat{\beta}$ & b) SE of $\hat{\beta}$ (family 1)  & c) SE of $\hat{\beta}$ (family 2)  \\
+                  \end{tabular}
+                  \end{center}
+              %    \caption*{\normalsize a): mixed-membership predicted using estimated coefficients match prediction using true coefficients.\\
+              %    b) and c): SEs across 100 simulated networks covers sd($\hat{\beta}$) (red crosses) well.}\label{beta}
+                 % Note: a): mixed-membership predicted using estimated coefficients vs using true coefficients.\\b) and c): SEs across 100 simulated networks vs sd($\hat{\beta}$) (red crosses).  \label{beta}
+            \end{figure}
+    \begin{itemize}
+        \item a): mixed-membership predicted using estimated coefficients match prediction using true coefficients.
+        \item b) and c): SEs across 100 simulated networks covers sd($\hat{\beta}$) (red crosses) well.
+    \end{itemize}
+
+
+\end{frame}
+
+\begin{frame}{Simulation Results}
+\textbf{Medium Case (Mixed Membership and Blockmodel):}
+
+\begin{figure} \scriptsize
+                \begin{center}
+                \begin{tabular}{ccc}
+                 \includegraphics[width=0.25\linewidth]{simulation/mod_S_all.pdf}&
+                 \includegraphics[width=0.25\linewidth]{simulation/mod_B_all.pdf}&
+                 \includegraphics[width=0.25\linewidth]{simulation/bm.pdf}\\
+              a) Mixed-membership (family 1) & b) Mixed-membership (family 2) & c) Blockmodel  \\
+                  \end{tabular}
+                  \end{center}
+                 % \caption*{\normalsize a) and b): estimated mixed-membership vectors align with known values; \\
+            %      c): estimated blockmodel match known values (white numbers)} \label{mm_B}
+                %  Note: a) and b): estimated mixed-membership vectors by time periods against known values. \\ c): estimated blockmodel against known values (indicated by the white numbers in each cell).  \label{mm_B}
+            \end{figure}
+    \begin{itemize}
+        \item a) and b): estimated mixed-membership vectors align with known values
+        \item c): estimated blockmodel match known values (white numbers)
+    \end{itemize}
+      %  \hyperlink{easy}{\beamerbutton{easy}} \hyperlink{hard}{\beamerbutton{hard}}
+\end{frame}
+
+
+\begin{frame}{Simulation Results}
+\textbf{Medium Case (Coefficients):}
+
+ \begin{figure} \scriptsize
+                \begin{center}
+                \begin{tabular}{ccc}
+                 \includegraphics[width=0.25\linewidth]{simulation/pred_prob_all.pdf}&
+                 \includegraphics[width=0.25\linewidth]{simulation/hess_S.pdf}&
+                 \includegraphics[width=0.25\linewidth]{simulation/hess_B.pdf}\\
+              a) Mixed-membership prediction with $\hat{\beta}$ & b) SE of $\hat{\beta}$ (family 1)  & c) SE of $\hat{\beta}$ (family 2)  \\
+                  \end{tabular}
+                  \end{center}
+              %    \caption*{\normalsize a): mixed-membership predicted using estimated coefficients match prediction using true coefficients.\\
+              %    b) and c): SEs across 100 simulated networks covers sd($\hat{\beta}$) (red crosses) well.}\label{beta}
+                 % Note: a): mixed-membership predicted using estimated coefficients vs using true coefficients.\\b) and c): SEs across 100 simulated networks vs sd($\hat{\beta}$) (red crosses).  \label{beta}
+            \end{figure}
+    \begin{itemize}
+        \item a): mixed-membership predicted using estimated coefficients match prediction using true coefficients.
+        \item b) and c): SEs across 100 simulated networks covers sd($\hat{\beta}$) (red crosses) well.
+    \end{itemize}
+
+   % \hyperlink{easy}{\beamerbutton{easy}} \hyperlink{hard}{\beamerbutton{hard}}
+\end{frame}
+
+
+\begin{frame}
+  \frametitle{Simulation Results}
+\textbf{Hard Case (Mixed Membership and Blockmodel):}
+
+\begin{figure} \scriptsize
+                \begin{center}
+                \begin{tabular}{ccc}
+                 \includegraphics[width=0.25\linewidth]{simulation/hard/mod_S_all.pdf}&
+                 \includegraphics[width=0.25\linewidth]{simulation/hard/mod_B_all.pdf}&
+                 \includegraphics[width=0.25\linewidth]{simulation/hard/bm.pdf}\\
+              a) Mixed-membership (family 1) & b) Mixed-membership (family 2) & c) Blockmodel  \\
+                  \end{tabular}
+                  \end{center}
+                 % \caption*{\normalsize a) and b): estimated mixed-membership vectors align with known values; \\
+            %      c): estimated blockmodel match known values (white numbers)} \label{mm_B}
+                %  Note: a) and b): estimated mixed-membership vectors by time periods against known values. \\ c): estimated blockmodel against known values (indicated by the white numbers in each cell).  \label{mm_B}
+            \end{figure}
+    \begin{itemize}
+        \item a) and b): estimated mixed-membership vectors align with known values
+        \item c): estimated blockmodel match known values (white numbers)
+    \end{itemize}
+\end{frame}
+
+\begin{frame}
+  \frametitle{Simulation Results}
+\textbf{Hard Case (Coefficients):}
+
+ \begin{figure} \scriptsize
+                \begin{center}
+                \begin{tabular}{ccc}
+                 \includegraphics[width=0.25\linewidth]{simulation/hard/pred_prob_all.pdf}&
+                 \includegraphics[width=0.25\linewidth]{simulation/hard/hess_S.pdf}&
+                 \includegraphics[width=0.25\linewidth]{simulation/hard/hess_B.pdf}\\
+              a) Mixed-membership prediction with $\hat{\beta}$ & b) SE of $\hat{\beta}$ (family 1)  & c) SE of $\hat{\beta}$ (family 2)  \\
+                  \end{tabular}
+                  \end{center}
+              %    \caption*{\normalsize a): mixed-membership predicted using estimated coefficients match prediction using true coefficients.\\
+              %    b) and c): SEs across 100 simulated networks covers sd($\hat{\beta}$) (red crosses) well.}\label{beta}
+                 % Note: a): mixed-membership predicted using estimated coefficients vs using true coefficients.\\b) and c): SEs across 100 simulated networks vs sd($\hat{\beta}$) (red crosses).  \label{beta}
+            \end{figure}
+    \begin{itemize}
+        \item a): mixed-membership predicted using estimated coefficients match prediction using true coefficients.
+        \item b) and c): SEs across 100 simulated networks covers sd($\hat{\beta}$) (red crosses) well.
+    \end{itemize}
+
+
+\end{frame}
+
+
+
+
+
+
+
+\section{Application}
+
+\begin{frame}{Framing for IR People}
+    \begin{itemize}
+        \item RQ: Whether and how states cluster in international cooperation?
+\vspace{3mm}
+        \item Dominant Answer: Around regime type
+        \begin{itemize}
+            \item Democracies use domestic institutional constraints as credible commitment device  \begin{tiny}
+                \color{gray} (Mansfield et al. 2002, Simmons and Danner 2009, Davis 2012, Koremenos 2016, Hyde and Saunders 2020, Imai and Lo 2021) \color{black}
+            \end{tiny}
+            \item Democracies share similar preferences in IO designs 
+            \begin{tiny}
+                \color{gray} (Hooghe et al. 2019, Ginsburg 2021, Tallberg and Vikberg 2024) \color{black}
+            \end{tiny}
+            \item Democracies use IO to reduce likelihood of backsliding
+            \begin{tiny}
+                \color{gray} (Pevehouse 2005, Keohane et al. 2009; Poast and Urpelainen 2015; Cottiero and Haggard 2023) \color{black}
+            \end{tiny}
+            \item The inverse arguments apply to autocratic clustering
+        \end{itemize}
+\vspace{3mm}
+        \item Problem with this view: Either project on state-state network or IO-IO network.
+    \end{itemize}
+\end{frame}
+
+\begin{frame}{Our Argument and Contribution}
+    \begin{itemize}
+        \item  Using the proper network structure, we show ``democracy" misses an importing clustering cleavage: geopolitical alignment. \begin{tiny}
+                \color{gray} (Davis and Pratt 2020, Davis 2023) \color{black}
+            \end{tiny}
+\vspace{3mm}
+            \item  Regime type and geopolitical preference jointly define a group of ``leading states" in international cooperation. 
+\vspace{3mm}         
+            \item Crucially, many democracies that have distinct geopolitical preferences than the US form a unique cluster.
+ 
+    \end{itemize}
+\end{frame}
+
+\begin{frame}{Application: State-IO Network, 1965-2014}
+\begin{itemize}[<+->]
+    \item \textbf{Data}: Yearly state-IGO membership data between 1965-2014, covering 200 countries and regions and 471 IGOs (Pevehouse et al., 2020; Davis \& Pratt, 2021). %\cite{pevehouse2020tracking, davis2021forces}
+
+    \item \textbf{Parameters}: Three groups for both the state (\textbf{S}) and IGO (\textbf{I}) families. One latent state.
+\end{itemize}
+    
+\end{frame}
+
+\begin{frame}{State and IGO Group Types}
+\vspace{-0.2in}
+\begin{figure} \footnotesize
+    \centering
+    \includegraphics[width=0.5\linewidth]{application/3by3_hess.pdf}
+    %\caption{Network graph summarizing the estimated blockmodel, where size of the nodes (circles) reflects aggregate membership in each group and weighted edges (lines) reflect the probability of membership.}
+\end{figure}
+
+\vspace{-0.3in}
+\scriptsize  
+\pause
+\begin{columns}[t] 
+    \column{0.48\textwidth}
+    \textbf{{State Groups}}
+    \begin{itemize}[<+->]
+        \item \textbf{\textcolor{crimson}{S1 (Internationalists)}}: Most likely to instantiate links to a large number of IGOs in I1 and I3.
+        \item \textbf{\textcolor{crimson}{S2 (Opportunists)}}: Most populous group in the state family. Very likely to instantiate links to IGOs in I1, unlikely to interact with I2 and I3.
+        \item \textbf{\textcolor{crimson}{S3 (Isolationists)}}: A small number of states that have a low likelihood to interact with IGOs across groups.
+    \end{itemize}
+
+    \column{0.48\textwidth}
+    \textbf{{IGO Groups}}
+    \begin{itemize}[<+->]
+        \item \textbf{\textcolor{crimson}{I1 (Universal IGOs)}}: Attract a large number of states across groups.
+        \item \textbf{\textcolor{crimson}{I2 (Trivial IGOs)}}: Large number of IGOs that are unlikely to instantiate links with any groups of states.
+        \item \textbf{\textcolor{crimson}{I3 (Exclusive IGOs)}}: A small number of IGOs that only interact with states in S1.
+    \end{itemize}
+\end{columns}
+
+\end{frame}
+
+
+\begin{frame}{Validating Group labels}
+\begin{itemize} \scriptsize
+    \item Rich, democratic states that are geo-politically aligned with the US are more likely to have larger share of mixed-membership in S1.
+     \item IGOs whose average members are more US-aligned and cross-regional are more likely to have a larger share of mixed-membership in I3. 
+\end{itemize}
+    \tiny \centering
+   \begin{tabular}{lcccccc}
+    \midrule \midrule \\[-1.8ex] Predictor & S1 & S2 & S3 &  I1 & I2 & I3 \\ 
+    \midrule UN IP  & -0.59 & -2.26 & -0.83 && \\ 
+      & (0.29) & (0.26) & (0.25) && \\ 
+    V-Dem  & 2.95 & 3.97 & 0.68 &&\\
+    & (0.63) & (0.72) & (0.71) &&\\
+    GDPpc  & 0.25 & 0.02 & -0.05 && \\ 
+    & (0.07) & (0.06) & (0.08) &&\\
+    Europe  & 1.33 & -2.61 & 0.37 && \\
+    & (0.50) & (0.47) & (0.46) && \\
+    \midrule 
+    Ideal point (lagged) &&&& -2.70 & -2.73 & -0.39 \\
+    & & & & (0.29) & (0.28) & (0.25) \\
+    Regional IO & & & & 0.72 & 0.80 & -0.05 \\ 
+    & & & & (0.51) & (0.57) & (0.53) \\
+    Mem. Size (lagged) & & & & 0.00 & -0.05 & -0.01 \\
+     & & & & (0.01) & (0.01) & (0.01) \\
+    Salient IO  & & & & -0.16 & -0.12 & -0.23 \\
+    & & & & (0.57) & (0.57) & (0.63) \\
+    \midrule Number of Dyads & 1,833,000 & & & & &  \\ \midrule \midrule
+    \end{tabular}
+\end{frame}
+
+
+\begin{frame}{Mixed Membership Dynamics}
+\begin{itemize}
+    \item Dynamic changes in mixed-membership align with related political events
+\end{itemize}
+    
+ \begin{figure} \footnotesize
+                \begin{center}
+                \begin{tabular}{ccc}
+                 
+                 \includegraphics[width=0.85\linewidth]{application/state_mem_hess.jpg}&
+                 
+                  \end{tabular}
+                  \end{center}
+                  %\caption{Dynamic History of Selected States' Mixed-Membership in G1-G3.}
+            \end{figure}
+
+\end{frame}
+
+
+\begin{frame}{Mixed Membership Dynamics}
+
+    
+ \begin{figure} \footnotesize
+                \begin{center}
+                \begin{tabular}{ccc}
+                 
+                 \includegraphics[width=0.85\linewidth]{application/io_mem_hess.jpg}&
+                 
+                  \end{tabular}
+                  \end{center}
+                  %\caption{Dynamic History of Selected States' Mixed-Membership in G1-G3.}
+            \end{figure}
+
+\end{frame}
+
+%\begin{frame}{Challenges to the LIO}
+%    \begin{figure}
+%        \centering
+%        \includegraphics[width=0.8\linewidth]{application/lio.pdf}
+%    \end{figure}
+%\end{frame}
+
+\section{Conclusion}
+\begin{frame}{Takeaways}
+    \begin{itemize}[<+->]
+        \item Robust, efficient model for dynamic bipartite network that avoids projection bias. \vspace{2mm}
+
+        \item Strong simulation recovery across various DGPs: memberships, blocks, coefficients, calibrated uncertainty. \vspace{2mm}
+
+        \item State–IGO application: interpretable state/IGO clusters validated covariate characteristics. \vspace{2mm}
+
+        \item Dynamic trajectories track major geopolitical shifts (e.g., US–China), highlighting liberal-order strains.
+    \end{itemize}
+\end{frame}
+
+
+
+ \miniframesoff
+\section{}   
+
+
+\begin{frame}
+  \frametitle{\textrm{ Appendix: Simulation (Dyadic Coefficients)}}
+%\textbf{Hard Case (Coefficients):}
+
+ \begin{figure} \scriptsize
+                \begin{center}
+  \begin{tabular}{cc}
+    \includegraphics[width=0.2\linewidth]
+  {simulation/easy/dyad_coef.pdf}&
+  \includegraphics[width=0.2\linewidth]
+  {simulation/easy/dyad_se.pdf}\\
+  \tiny{Easy: Coefficient} & \tiny{Easy: SE}\\
+   \includegraphics[width=0.2\linewidth]
+  {simulation/dyad_coef.pdf}&
+  \includegraphics[width=0.2\linewidth]
+  {simulation/dyad_se.pdf}\\
+  \tiny{Medium: Coefficient} & \tiny{Medium: SE}\\
+   \includegraphics[width=0.2\linewidth]
+  {simulation/hard/dyad_coef.pdf}&
+  \includegraphics[width=0.2\linewidth]
+  {simulation/hard/dyad_se.pdf}\\
+  \tiny{Hard: Coefficient} & \tiny{Hard: SE}\\
+  \end{tabular}
+                  \end{center}
+         
+            \end{figure}
+    \begin{itemize}
+        \item Dyadic Coefficient and SE recovery across 100 simulated networks
+   
+    \end{itemize}
+
+
+\end{frame}
+
+\end{document}

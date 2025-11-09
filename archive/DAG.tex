@@ -1,0 +1,84 @@
+\documentclass[tikz,border=5pt]{standalone}
+\usepackage{tikz}
+\usetikzlibrary{bayesnet}
+\usepackage{xcolor}
+
+% background colors
+\definecolor{family1bg}{RGB}{255,245,245}  
+\definecolor{family2bg}{RGB}{245,245,255}  
+
+\begin{document}
+
+\begin{tikzpicture}
+
+
+  \node[latent] (st_1) at (0, 5) {$S_{t-1}$};
+  \node[const] (A) at (0, 4.3) {\textbf{A}};
+  \node[latent] (st) at (0, 3.5) {$S_t$};
+
+  % Family 1
+  \begin{scope}[on background layer]
+    \fill[family1bg, rounded corners] (-3.7, 0.6) rectangle (-1.1, 2.8);
+  \end{scope}
+  \draw[dashed, rounded corners, thick, color=gray!70] (-3.7, 0.6) rectangle (-1.1, 2.8);
+  \node at (-2.4, 3.0) {\textbf{Family 1}};
+
+  % Family 1 nodes
+  \node[obs, fill=gray!20] (xpt) at (-3.2, 2.2) {$x_{pt}$};
+  \node[latent] (pi) at (-2.2, 2.2) {$\pi_{pt}$};
+  \node[const] (b1) at (-3.2, 1.2) {$\beta_1$};
+
+  % Family 2 background box
+  \begin{scope}[on background layer]
+    \fill[family2bg, rounded corners] (1.1, 0.6) rectangle (3.7, 2.8);
+  \end{scope}
+  \draw[dashed, rounded corners, thick, color=gray!70] (1.1, 0.6) rectangle (3.7, 2.8);
+  \node at (2.4, 3.0) {\textbf{Family 2}};
+
+  % Family 2 nodes
+  \node[obs, fill=gray!20] (xqt) at (3.2, 2.2) {$x_{qt}$};
+  \node[latent] (psi) at (2.2, 2.2) {$\psi_{qt}$};
+  \node[const] (b2) at (3.2, 1.2) {$\beta_2$};
+
+  % Dyads
+  \node[latent] (z) at (-2.2, -0.6) {$z_{pqt}$};
+  \node[latent] (u) at (2.2, -0.6) {$u_{pqt}$};
+  \node[latent] (bzu) at (0, -1.6) {$B_{z,u}$};
+  \node[obs, fill=gray!20] (d) at (2.2, -1.6) {$d_{pqt}$};
+  \node[obs, draw=black, thick, fill=gray!20] (y) at (0, -2.8) {$Y_{pqt}$};
+  \node[const] (gamma) at (2.2, -2.8) {$\gamma$};
+
+  % Dyad plate
+  \draw[rounded corners, thick, color=gray!70] (-3.1, -3.4) rectangle (3.1, -0.1);
+  \node at (2, -3.2) {\textbf{Dyads $(p,q)$}};
+
+  % Arrows
+  \path (st_1) edge[draw=none] (A);
+  \draw[-, thick] (st_1) -- (A);
+  \draw[->, thick] (A) -- (st) node[midway, right=4pt, yshift=-4pt] {\scriptsize Categorical};
+
+\draw[->] (xpt) -- (pi) node[midway, left=-20pt, yshift=12pt] {\scriptsize Dirichlet};
+\draw[->] (xqt) -- (psi) node[midway, right=-20pt, yshift=12pt] {\scriptsize Dirichlet};
+  \draw[->] (xpt) -- (pi);
+  \draw[->] (b1) -- (pi);
+
+  \draw[->] (xqt) -- (psi);
+  \draw[->] (b2) -- (psi);
+
+ \draw[->] (st) -- (pi);
+  \draw[->] (st) -- (psi);
+
+
+  \draw[->] (pi) -- (z) node[midway, left=-20pt, yshift=-12pt] {\scriptsize Categorical};
+  \draw[->] (psi) -- (u) node[midway, left=-20pt, yshift=-12pt] {\scriptsize Categorical};
+
+  \draw[->] (z) -- (bzu);
+  \draw[->] (u) -- (bzu);
+  \draw[->] (bzu) -- (y);
+  \draw[->] (d) -- (y);
+    \draw[->] (gamma) -- (y);
+  \draw[->] (bzu) -- (y) node[midway, left=3pt, yshift=0pt] {\scriptsize Bernoulli};
+
+\end{tikzpicture}
+
+\end{document}
