@@ -22,6 +22,7 @@
 \usepackage{pgf, tikz}
 \usepackage{pdflscape}
 \usepackage{float}
+\usepackage{rotating}
 \usepackage{array}
 \usepackage{ragged2e}
 \newcolumntype{C}[1]{>{\centering\arraybackslash}m{#1}}          % centered
@@ -372,11 +373,13 @@ Therefore, collapsing IGOs and focusing only on the number of organizations that
 \begin{tabular}{c}
 
 \includegraphics[width=1\linewidth]{illustration/new_4/full5.pdf} \\[-2pt]
-%(a) All IGOs & (b) Selected IGOs \\[6pt]
 \end{tabular}
 \caption{\small \textbf{State-IGO membership networks (1965-2014).} The figure depicts three snapshots of the dynamic bipartite membership network between 14 states and four IGOs. The first column shows the real bipartite data structure. The second column shows the simple projection of the corresponding, with edges indicating the number of IO co-membership between two states. The third column shows the network in the second column with edges colored by the combination of IOs that two states share membership in. The four IGOs are the OECD (Organization for Economic Co-operation and Development), G24 (Group of Twenty-Four), NATO (North Atlantic Treaty Organization), and APEC (Asia-Pacific Economic Cooperation). Both IGO and state node sizes are scaled by the number of ties they have. These networks illustrate how networks change drastically over time, and that information gets lost when projecting a bipartite networks into a unipartite ones.}
 \label{net_visual}
 \end{figure}
+
+
+
 
 \FloatBarrier
 \section{The Proposed Methodology}
